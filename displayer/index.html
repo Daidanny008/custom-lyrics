@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyrics</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="chrome">
+  <button id="back" class="icon-btn" hidden aria-label="Back to library">←</button>
+  <div id="crumb" class="crumb">Lyrics</div>
+  <div class="chrome-actions">
+    <button id="scale-down" class="icon-btn" aria-label="Smaller text">A−</button>
+    <button id="scale-up" class="icon-btn" aria-label="Larger text">A+</button>
+    <button id="theme" class="icon-btn" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main id="app" aria-live="polite"></main>
+
+<template id="tpl-library">
+  <div class="library">
+    <input id="search" class="search" type="search" placeholder="Search title, artist, album, tag…"
+           autocomplete="off" spellcheck="false">
+    <div id="facets" class="facets"></div>
+    <div id="results" class="results"></div>
+    <p id="count" class="count"></p>
+  </div>
+</template>
+
+<template id="tpl-song">
+  <article class="song">
+    <div class="song-head">
+      <h1 id="title" class="title"></h1>
+      <p id="byline" class="byline"></p>
+      <p id="tags" class="tagline"></p>
+    </div>
+    <div class="picker">
+      <div id="chips" class="chips" role="group" aria-label="Lyric versions"></div>
+      <button id="mode" class="mode-btn" type="button"></button>
+    </div>
+    <div id="lyrics" class="lyrics"></div>
+    <p id="notes" class="notes"></p>
+  </article>
+</template>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

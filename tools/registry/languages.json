@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "_comment": "Identity is the key. render_lang is what the browser sees in lang= (font matching keys on zh, not cmn/yue/nan).",
+  "universal_variants": {
+    "ipa": { "label": "IPA", "kind": "phonetic" }
+  },
+  "languages": {
+    "en":       { "label": "English",               "endonym": "English",    "script": "latin",    "variants": {} },
+    "cmn-Hans": { "label": "Mandarin (Simplified)", "endonym": "普通话",      "script": "han", "render_lang": "zh-Hans",
+                  "variants": { "pinyin":   { "label": "Pinyin",   "kind": "romanization" },
+                                "bopomofo": { "label": "注音",     "kind": "phonetic" } } },
+    "cmn-Hant": { "label": "Mandarin (Traditional)","endonym": "國語",        "script": "han", "render_lang": "zh-Hant",
+                  "variants": { "pinyin":   { "label": "Pinyin",   "kind": "romanization" },
+                                "bopomofo": { "label": "注音",     "kind": "phonetic" } } },
+    "yue-Hant": { "label": "Cantonese",             "endonym": "粵語",        "script": "han", "render_lang": "zh-Hant",
+                  "variants": { "jyutping": { "label": "Jyutping", "kind": "romanization" },
+                                "yale":     { "label": "Yale",     "kind": "romanization" } } },
+    "nan-Hant": { "label": "Hokkien / Min Nan",     "endonym": "閩南語",      "script": "han", "render_lang": "zh-Hant",
+                  "variants": { "poj":      { "label": "POJ",      "kind": "romanization" },
+                                "tailo":    { "label": "Tâi-lô",   "kind": "romanization" } } },
+    "nan-TW":   { "label": "Taiwanese Hokkien",     "endonym": "臺語",        "script": "han", "render_lang": "zh-Hant",
+                  "variants": { "poj":      { "label": "POJ",      "kind": "romanization" },
+                                "tailo":    { "label": "Tâi-lô",   "kind": "romanization" } } },
+    "ja":       { "label": "Japanese",              "endonym": "日本語",      "script": "japanese",
+                  "variants": { "kana":     { "label": "かな",     "kind": "script" },
+                                "romaji":   { "label": "Rōmaji",   "kind": "romanization" } } },
+    "ru":       { "label": "Russian",               "endonym": "Русский",    "script": "cyrillic",
+                  "variants": { "translit": { "label": "Translit", "kind": "romanization" } } },
+    "uk":       { "label": "Ukrainian",             "endonym": "Українська", "script": "cyrillic",
+                  "variants": { "translit": { "label": "Translit", "kind": "romanization" } } },
+    "fr":       { "label": "French",                "endonym": "Français",   "script": "latin",  "variants": {} },
+    "it":       { "label": "Italian",               "endonym": "Italiano",   "script": "latin",  "variants": {} },
+    "es":       { "label": "Spanish",               "endonym": "Español",    "script": "latin",  "variants": {} },
+    "la":       { "label": "Latin",                 "endonym": "Latina",     "script": "latin",  "variants": {} },
+    "gd":       { "label": "Scottish Gaelic",       "endonym": "Gàidhlig",   "script": "latin",  "variants": {} }
+  }
+}

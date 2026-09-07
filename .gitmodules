@@ -1,0 +1,3 @@
+[submodule "lyrics"]
+	path = lyrics
+	url = ../custom-lyrics-data

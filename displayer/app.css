@@ -1,0 +1,206 @@
+/* ---------------------------------------------------------------- tokens */
+:root {
+  --scale: 1;
+
+  --bg: #12110f;
+  --bg-raised: #1a1917;
+  --bg-chip: #232120;
+  --fg: #ece7df;
+  --fg-dim: #a29a8f;
+  --fg-faint: #6f675e;
+  --accent: #d9a441;
+  --accent-dim: #8a6a2b;
+  --rule: #2e2b28;
+
+  /* Per-script stacks. Han needs a different face and more leading than Latin;
+     Cyrillic reads better in a face with real Cyrillic design (PT Serif). */
+  --font-latin: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-cyrillic: "PT Serif", "Charter", Georgia, "Times New Roman", serif;
+  --font-han: "PingFang SC", "Hiragino Sans GB", "Source Han Sans SC",
+              "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  --font-japanese: "Hiragino Sans", "Yu Gothic", "Noto Sans CJK JP", sans-serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  /* Romanizations carry stacked diacritics (POJ ō͘, Gàidhlig à, IPA) — this stack
+     is chosen for glyph coverage, not looks. */
+  --font-roman: "Charis SIL", "Doulos SIL", "Gentium Plus", "Lucida Grande",
+                "DejaVu Sans", var(--font-ui);
+}
+
+:root[data-theme="light"] {
+  --bg: #faf7f1;
+  --bg-raised: #fffdf9;
+  --bg-chip: #ece7dc;
+  --fg: #221f1b;
+  --fg-dim: #5d564c;
+  --fg-faint: #918879;
+  --accent: #966a12;
+  --accent-dim: #c9a45e;
+  --rule: #ddd5c7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- chrome */
+.chrome {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: .6rem;
+  padding: .55rem max(1rem, calc(50vw - 30rem));
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+.crumb { flex: 1; font-size: .85rem; color: var(--fg-dim); font-weight: 500;
+         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chrome-actions { display: flex; gap: .25rem; }
+.icon-btn {
+  border: 1px solid transparent; background: none; color: var(--fg-dim);
+  font: inherit; font-size: .8rem; padding: .3rem .5rem; border-radius: 6px; cursor: pointer;
+}
+.icon-btn:hover { background: var(--bg-chip); color: var(--fg); }
+
+main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
+
+/* ---------------------------------------------------------------- library */
+.search {
+  width: 100%; padding: .7rem .9rem; font: inherit; font-size: 1rem;
+  background: var(--bg-raised); color: var(--fg);
+  border: 1px solid var(--rule); border-radius: 10px;
+}
+.search:focus { outline: 2px solid var(--accent-dim); outline-offset: 1px; }
+
+.facets { margin: .9rem 0 1.2rem; display: flex; flex-direction: column; gap: .4rem; }
+.facet-row { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+.facet-name {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--fg-faint); width: 5.5rem; flex: none;
+}
+
+.results { display: flex; flex-direction: column; }
+.song-row {
+  display: flex; align-items: baseline; gap: 1rem; width: 100%; text-align: left;
+  padding: .85rem .6rem; background: none; border: 0;
+  border-bottom: 1px solid var(--rule); color: inherit; font: inherit; cursor: pointer;
+}
+.song-row:hover { background: var(--bg-raised); }
+.song-main { flex: 1; min-width: 0; }
+.song-title { font-family: var(--font-latin); font-size: 1.15rem; }
+.song-artist { font-size: .8rem; color: var(--fg-dim); margin-top: .15rem; }
+.song-meta { display: flex; align-items: center; gap: .5rem; flex: none; }
+.badges { display: flex; gap: .25rem; }
+.badge {
+  font-size: .65rem; padding: .12rem .4rem; border-radius: 4px;
+  background: var(--bg-chip); color: var(--fg-faint);
+}
+.badge.is-original { color: var(--accent); }
+.song-year { font-size: .75rem; color: var(--fg-faint); font-variant-numeric: tabular-nums; }
+.count { font-size: .72rem; color: var(--fg-faint); margin-top: 1rem; }
+
+/* ---------------------------------------------------------------- chips */
+.chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .35rem .7rem; border-radius: 999px; cursor: pointer;
+  background: var(--bg-chip); color: var(--fg-dim);
+  border: 1px solid transparent; font: inherit; font-size: .82rem; white-space: nowrap;
+}
+.chip:hover { color: var(--fg); }
+.chip.on { background: var(--accent); color: #17140e; border-color: var(--accent); font-weight: 600; }
+.chip-sm { font-size: .74rem; padding: .22rem .55rem; }
+.chip-key { font-size: .62rem; opacity: .5; font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- song head */
+.song-head { margin-bottom: 1.1rem; }
+.title { font-family: var(--font-latin); font-size: 2rem; font-weight: 600; margin: 0 0 .3rem; }
+.byline { margin: 0; font-size: .88rem; color: var(--fg-dim); }
+.byline-sub { color: var(--fg-faint); }
+.tagline { margin: .5rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.tag { font-size: .7rem; color: var(--fg-faint); }
+
+.picker {
+  position: sticky; top: 2.7rem; z-index: 5;
+  display: flex; align-items: center; gap: .6rem;
+  padding: .7rem 0; margin-bottom: .5rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+/* The horizontal multi-select: scrolls sideways rather than wrapping, so the
+   row height never changes as versions are added. */
+.chips {
+  display: flex; gap: .4rem; overflow-x: auto; flex: 1;
+  scrollbar-width: thin; padding-bottom: .15rem;
+}
+.chips::-webkit-scrollbar { height: 4px; }
+.chips::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 2px; }
+.mode-btn {
+  flex: none; font: inherit; font-size: .7rem; cursor: pointer;
+  padding: .3rem .55rem; border-radius: 6px;
+  background: none; border: 1px solid var(--rule); color: var(--fg-faint);
+}
+.mode-btn:hover { color: var(--fg); border-color: var(--fg-faint); }
+
+/* ---------------------------------------------------------------- lyrics */
+.lyrics { margin-top: 1.2rem; }
+/* No section headings — the gap is the only separator, so it carries the
+   weight the label used to. */
+.sec { margin-bottom: 2.6rem; }
+
+.ln {
+  margin: 0;
+  font-size: calc(1.02rem * var(--scale));
+  line-height: 1.55;
+  /* Hanging indent: a wrapped continuation never reads as a new lyric line. */
+  padding-left: 1.3em;
+  text-indent: -1.3em;
+}
+.ln[data-script="han"]      { font-family: var(--font-han); line-height: 1.85; letter-spacing: .01em; }
+.ln[data-script="japanese"] { font-family: var(--font-japanese); line-height: 1.85; }
+.ln[data-script="cyrillic"] { font-family: var(--font-cyrillic); }
+.ln[data-script="latin"]    { font-family: var(--font-latin); }
+
+.ln[data-kind="original"]     { color: var(--fg); font-weight: 500; }
+.ln[data-kind="translation"]  { color: var(--fg-dim); }
+.ln[data-kind="romanization"],
+.ln[data-kind="phonetic"] {
+  font-family: var(--font-roman);
+  font-size: calc(.86rem * var(--scale));
+  color: var(--fg-faint);
+  letter-spacing: .012em;
+  line-height: 1.45;
+}
+.ln[data-kind="script"] { color: var(--fg-dim); font-size: calc(.92rem * var(--scale)); }
+.ln.slot { min-height: 1em; }
+
+/* section mode: whole block per version */
+.block + .block { margin-top: .55rem; }
+.block.sep { padding-top: .55rem; border-top: 1px dashed var(--rule); }
+
+/* line mode: one group per line position */
+.group { margin-bottom: .95rem; }
+.group .ln[data-kind="original"] { margin-bottom: .05rem; }
+
+.notes {
+  margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+  font-size: .76rem; color: var(--fg-faint); line-height: 1.6;
+}
+.empty-note { color: var(--fg-faint); font-size: .85rem; }
+.fatal {
+  white-space: pre-wrap; background: var(--bg-raised); border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent); padding: 1rem; border-radius: 8px;
+  font-size: .84rem; line-height: 1.6; color: var(--fg-dim);
+}
+
+/* ---------------------------------------------------------------- print */
+@media print {
+  :root { --bg: #fff; --fg: #000; --fg-dim: #333; --fg-faint: #666; --rule: #ccc; }
+  .chrome, .picker, .notes { display: none; }
+  main { padding: 0; }
+  .sec { break-inside: avoid; margin-bottom: 1.4rem; }
+}
