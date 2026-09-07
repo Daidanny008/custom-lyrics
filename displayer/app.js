@@ -1,6 +1,6 @@
 import { parseSections } from "./lib/parse.js";
 import { renderLyrics, resolveMode } from "./lib/render.js";
-import { filterSongs, songRow, presentFacets, artistLine } from "./lib/library.js";
+import { filterSongs, songRow, presentFacets, artistLine, bylineFor } from "./lib/library.js";
 import * as S from "./lib/state.js";
 
 const app = document.getElementById("app");
@@ -149,8 +149,9 @@ async function renderSong(route) {
   document.getElementById("title").textContent = song.display_title;
 
   const byline = document.getElementById("byline");
-  byline.textContent = artistLine(song);
-  const sub = [song.album, song.year].filter(Boolean).join(" · ");
+  byline.textContent = bylineFor(song);
+  const named = Boolean(artistLine(song));
+  const sub = [named ? song.album : null, song.year].filter(Boolean).join(" · ");
   if (sub) byline.appendChild(el("span", "byline-sub", ` — ${sub}`));
 
   const tagline = document.getElementById("tags");

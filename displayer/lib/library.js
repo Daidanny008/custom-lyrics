@@ -20,9 +20,14 @@ export function filterSongs(songs, query, tags, langs) {
 }
 
 export function artistLine(song) {
-  return song.artist
+  return (song.artist || [])
     .map((a) => (a.romanized && a.romanized !== a.name ? `${a.name} (${a.romanized})` : a.name))
     .join(" · ");
+}
+
+/** Artist if known, else the album or show it came from, else nothing. */
+export function bylineFor(song) {
+  return artistLine(song) || song.album || "";
 }
 
 export function songRow(song, index, onOpen) {
@@ -30,7 +35,7 @@ export function songRow(song, index, onOpen) {
   row.type = "button";
   const main = el("div", "song-main");
   main.appendChild(el("div", "song-title", song.display_title));
-  main.appendChild(el("div", "song-artist", artistLine(song)));
+  main.appendChild(el("div", "song-artist", bylineFor(song)));
   row.appendChild(main);
 
   const meta = el("div", "song-meta");

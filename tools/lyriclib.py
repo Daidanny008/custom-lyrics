@@ -149,7 +149,7 @@ def check_meta(song_id: str, meta: dict, allowed_tags: set, langs: dict):
         problems.append(f"meta.json: id '{meta.get('id')}' does not match folder name '{song_id}'")
     if not ID_RE.match(song_id):
         problems.append(f"folder name '{song_id}' is not a lowercase-kebab slug")
-    for required in ("title", "artist", "original_languages"):
+    for required in ("title", "original_languages"):
         if not meta.get(required):
             problems.append(f"meta.json: missing required field '{required}'")
     if "tags" not in meta:
@@ -158,8 +158,10 @@ def check_meta(song_id: str, meta: dict, allowed_tags: set, langs: dict):
     # has to be checked one level down or a stub indexes with no title.
     if meta.get("title") and not any(v.strip() for v in meta["title"].values()):
         problems.append("meta.json: every title is blank - fill in at least one")
-    if meta.get("artist") and not any(a.get("name", "").strip() for a in meta["artist"]):
-        problems.append("meta.json: every artist name is blank")
+    if "artist" in meta and meta["artist"] and \
+            not any(a.get("name", "").strip() for a in meta["artist"]):
+        problems.append("meta.json: artist is present but every name is blank - "
+                        "drop the field entirely if the performer is unknown")
     for lang in meta.get("original_languages", []):
         if lang not in registry:
             problems.append(f"meta.json: original_languages has unknown language '{lang}'")
