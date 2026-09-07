@@ -154,6 +154,9 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 
 .ln {
   margin: 0;
+  /* Lyric files carry deliberate phrase spacing (a romanization mirrors the
+     gaps in its source line); HTML would collapse those runs of spaces. */
+  white-space: pre-wrap;
   font-size: calc(1.02rem * var(--scale));
   line-height: 1.55;
   /* Hanging indent: a wrapped continuation never reads as a new lyric line. */
