@@ -184,6 +184,10 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 
 /* line mode: one group per line position */
 .group { margin-bottom: .95rem; }
+/* With a single version there is nothing to hold together, so the group gap
+   would just make every line look like its own stanza — and swamp the section
+   break. Let the lines flow; the section margin alone separates stanzas. */
+.lyrics[data-versions="1"] .group { margin-bottom: 0; }
 .group .ln[data-kind="original"] { margin-bottom: .05rem; }
 
 .notes {

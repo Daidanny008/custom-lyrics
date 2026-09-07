@@ -72,5 +72,6 @@ export function renderLyrics(root, views, mode) {
   }
   const resolved = resolveMode(mode);
   root.dataset.mode = resolved;
+  root.dataset.versions = views.length;
   (resolved === "section" ? renderBySection : renderByLine)(root, views);
 }

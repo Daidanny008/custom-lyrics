@@ -15,6 +15,5 @@ python3 tools/validate.py || echo "  (continuing; broken songs will be skipped)"
 python3 tools/build_index.py || true
 
 URL="http://localhost:${PORT}/displayer/"
-echo "  serving  $URL   (ctrl-c to stop)"
 command -v open >/dev/null && (sleep 1 && open "$URL" &) || true
-exec python3 -m http.server "$PORT" --bind 127.0.0.1
+exec python3 tools/serve.py --port "$PORT"

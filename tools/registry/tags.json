@@ -3,6 +3,7 @@
   "_comment": "Tags are only for what the language facet cannot express. Language is NEVER a tag - it comes from filenames and original_languages. Grow with: new_song.py --add-tag <tag>",
   "tags": [
     "chinese-opera",
-    "opera"
+    "opera",
+    "xiqiang"
   ]
 }
