@@ -285,6 +285,21 @@ def display_title(song: Song):
     return next(iter(title.values()), song.id)
 
 
+def song_languages(song: Song):
+    """Original language(s) first, then the rest in file order — so a row's
+    badges lead with what the song was actually written in."""
+    ordered, seen = [], set()
+    for lang in song.meta.get("original_languages", []):
+        if lang not in seen:
+            ordered.append(lang)
+            seen.add(lang)
+    for f in song.files:
+        if f["lang"] not in seen:
+            ordered.append(f["lang"])
+            seen.add(f["lang"])
+    return ordered
+
+
 def to_index_entry(song: Song, langs: dict):
     return {
         "id": song.id,
@@ -294,7 +309,7 @@ def to_index_entry(song: Song, langs: dict):
         "album": song.meta.get("album"),
         "year": song.meta.get("year"),
         "original_languages": song.meta.get("original_languages", []),
-        "languages": sorted({f["lang"] for f in song.files}),
+        "languages": song_languages(song),
         "tags": song.meta.get("tags", []),
         "notes": song.meta.get("notes"),
         "files": song.files,
