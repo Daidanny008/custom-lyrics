@@ -13,6 +13,7 @@ fi
 
 python3 tools/validate.py || echo "  (continuing; broken songs will be skipped)"
 python3 tools/build_index.py || true
+python3 tools/stats.py >/dev/null || true
 
 URL="http://localhost:${PORT}/displayer/"
 command -v open >/dev/null && (sleep 1 && open "$URL" &) || true
