@@ -91,11 +91,14 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 }
 .song-row:hover { background: var(--bg-raised); }
 .song-main { flex: 1; min-width: 0; }
-/* All three parts read as peers: same size, same colour. Only the title's
-   serif and the separators distinguish them. */
-.song-title, .song-artist, .song-source { font-size: 1.02rem; color: var(--fg); }
+/* The whole chain reads as one line at one weight — same size, same colour,
+   separators included. Only the title's serif sets it apart. */
+.song-title, .song-artist, .song-source, .song-sep {
+  font-size: 1.02rem;
+  color: var(--fg);
+}
 .song-title { font-family: var(--font-latin); }
-.song-sep { font-size: 1.02rem; color: var(--fg-faint); margin: 0 .45rem; }
+.song-sep { margin: 0 .45rem; }
 .song-meta { display: flex; align-items: center; gap: .5rem; flex: none; }
 .badges { display: flex; gap: .25rem; }
 .badge {
