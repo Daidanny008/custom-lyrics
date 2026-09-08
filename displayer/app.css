@@ -223,6 +223,10 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
   text-align: left;
 }
 
+/* section mode with attribution: each stanza is cut into runs by singer */
+.run + .run { margin-top: .9rem; }
+.run-who { margin-bottom: .15rem; color: var(--fg); font-weight: 600; }
+
 /* section mode: whole block per version */
 .block + .block { margin-top: .55rem; }
 .block.sep { padding-top: .55rem; border-top: 1px dashed var(--rule); }

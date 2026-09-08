@@ -192,18 +192,41 @@ function appendUnitLine(parent, unit, i, j) {
   parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j]));
 }
 
-/** 1-2 selected: whole section in A, then whole section in B. */
+/** Consecutive lines of section i sung by the same person. */
+function speakerRuns(speakers, i) {
+  const labels = speakers.labels[i];
+  const runs = [];
+  labels.forEach((label, j) => {
+    const last = runs[runs.length - 1];
+    if (last && last.label === label) last.end = j + 1;
+    else runs.push({ label, start: j, end: j + 1 });
+  });
+  return runs;
+}
+
+/** Whole section in A, then whole section in B. With attribution on, the
+ *  section is first cut into runs by singer and each run named — a column of
+ *  names beside a block says nothing about which line belongs to whom. */
 function renderBySection(root, units, sectionCount) {
+  const attribution = units.find((u) => u.speakers);
+  const lyric = units.filter((u) => !u.speakers);
   for (let i = 0; i < sectionCount; i++) {
     const sec = el("section", "sec");
-    units.forEach((unit, ui) => {
-      const block = el("div", "block");
-      if (!unit.speakers) block.dataset.kind = (unit.view || unit.base).kind;
-      if (ui > 0) block.classList.add("sep");
-      const n = unitLines(unit, i);
-      for (let j = 0; j < n; j++) appendUnitLine(block, unit, i, j);
-      sec.appendChild(block);
-    });
+    const runs = attribution
+      ? speakerRuns(attribution.speakers, i)
+      : [{ label: null, start: 0, end: unitLines(lyricRef(units), i) }];
+    for (const run of runs) {
+      const wrap = attribution ? el("div", "run") : sec;
+      if (attribution) wrap.appendChild(el("div", "run-who", run.label || ""));
+      lyric.forEach((unit, ui) => {
+        const block = el("div", "block");
+        block.dataset.kind = (unit.view || unit.base).kind;
+        if (ui > 0) block.classList.add("sep");
+        for (let j = run.start; j < run.end; j++) appendUnitLine(block, unit, i, j);
+        wrap.appendChild(block);
+      });
+      if (attribution) sec.appendChild(wrap);
+    }
     root.appendChild(sec);
   }
 }
