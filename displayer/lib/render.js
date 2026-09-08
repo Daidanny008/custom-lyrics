@@ -58,8 +58,11 @@ function rubyNode(unit, i, j) {
   let k = 0;
   for (const ch of chars) {
     if (HAN.test(ch)) {
+      // <ruby>/<rt> keeps the markup meaningful, but the character sits in its
+      // own <span> so CSS can stack and left-align the two independently —
+      // ruby-align has poor browser support.
       const ruby = document.createElement("ruby");
-      ruby.appendChild(document.createTextNode(ch));
+      ruby.appendChild(el("span", "rb", ch));
       const rt = document.createElement("rt");
       rt.textContent = syllables[k++];
       ruby.appendChild(rt);
