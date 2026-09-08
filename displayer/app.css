@@ -241,14 +241,14 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 .cols[data-who] {
   grid-template-columns: max-content repeat(var(--cols, 1), minmax(0, 1fr));
 }
+/* Same size, colour and line-height as the lyric it names, so it sits on the
+   line rather than floating above it. */
 .ln.speaker {
-  font-family: var(--font-ui);
-  font-size: .8em;
-  color: var(--fg-faint);
+  color: var(--fg);
   white-space: nowrap;
   padding-left: 0;
   text-indent: 0;
-  padding-right: .3rem;
+  padding-right: .5rem;
 }
 /* Too narrow to sit side by side — stack the columns rather than crush them. */
 @media (max-width: 720px) {

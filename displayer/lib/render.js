@@ -32,7 +32,9 @@ export function extractSpeakers(view) {
     labels.push(secLabels);
     show.push(secShow);
   }
-  return found ? { labels, show } : null;
+  // The script drives line-height, so the column must share the base's to
+  // sit on the same line rather than riding above it.
+  return found ? { labels, show, script: view.script, lang: view.render_lang } : null;
 }
 
 /** The label now lives in its own column, so take it off the lyric line. */
@@ -173,6 +175,8 @@ const lyricRef = (units) => units.find((u) => !u.speakers);
 function appendUnitLine(parent, unit, i, j) {
   if (unit.speakers) {
     const p = el("p", "ln speaker");
+    p.dataset.script = unit.speakers.script;
+    p.lang = unit.speakers.lang;
     p.textContent = unit.speakers.show[i][j] ? (unit.speakers.labels[i][j] || "") : "";
     parent.appendChild(p);
     return;
