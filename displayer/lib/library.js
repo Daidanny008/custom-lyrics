@@ -46,7 +46,6 @@ export function songRow(song, index, onOpen) {
     badges.appendChild(b);
   }
   meta.appendChild(badges);
-  if (song.year) meta.appendChild(el("span", "song-year", String(song.year)));
   row.appendChild(meta);
 
   row.addEventListener("click", () => onOpen(song.id));
