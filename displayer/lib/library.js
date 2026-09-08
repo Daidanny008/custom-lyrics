@@ -33,9 +33,18 @@ export function bylineFor(song) {
 export function songRow(song, index, onOpen) {
   const row = el("button", "song-row");
   row.type = "button";
+  // [title] • [singer] • [source] — singer and source are each optional, and
+  // a separator only appears between two parts that both exist.
   const main = el("div", "song-main");
-  main.appendChild(el("div", "song-title", song.display_title));
-  main.appendChild(el("div", "song-artist", bylineFor(song)));
+  const parts = [
+    ["song-title", song.display_title],
+    ["song-artist", artistLine(song)],
+    ["song-source", song.album || ""],
+  ].filter(([, text]) => text);
+  parts.forEach(([cls, text], i) => {
+    if (i) main.appendChild(el("span", "song-sep", "•"));
+    main.appendChild(el("span", cls, text));
+  });
   row.appendChild(main);
 
   const meta = el("div", "song-meta");

@@ -92,7 +92,9 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 .song-row:hover { background: var(--bg-raised); }
 .song-main { flex: 1; min-width: 0; }
 .song-title { font-family: var(--font-latin); font-size: 1.15rem; }
-.song-artist { font-size: .8rem; color: var(--fg-dim); margin-top: .15rem; }
+.song-sep { color: var(--fg-faint); margin: 0 .45rem; font-size: .8rem; }
+.song-artist { font-size: .8rem; color: var(--fg-dim); }
+.song-source { font-size: .8rem; color: var(--fg-faint); }
 .song-meta { display: flex; align-items: center; gap: .5rem; flex: none; }
 .badges { display: flex; gap: .25rem; }
 .badge {
