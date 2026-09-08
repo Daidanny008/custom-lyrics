@@ -1,8 +1,10 @@
 // Model + selection -> DOM. Both modes read the same parsed model; only the loop differs.
 
 // One Han character is exactly one syllable, which is what makes per-character
-// alignment with a romanization possible at all.
-const HAN = /[㐀-䶿一-鿿豈-﫿]/;
+// alignment with a romanization possible at all. The second range covers the
+// CJK extension planes — 𪜶 and friends live there, and without it a line
+// containing one would never align.
+const HAN = /[㐀-䶿一-鿿豈-﫿]|[\u{20000}-\u{3134F}]/u;
 
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
@@ -42,6 +44,28 @@ function toUnits(views) {
   return units;
 }
 
+/** Split a Han line into render units. A unit with `column: true` gets one
+ *  reading; anything else is passed through as plain text.
+ *
+ *  Hokkien writes some characters that Unicode only encodes outside the common
+ *  planes — and that no installed font draws — as their two components in
+ *  parentheses, e.g. (亻因) for the single syllable "in". So a parenthesised
+ *  pair of Han characters may be one column, not two. */
+function charUnits(base, collapsePairs) {
+  const chars = [...base];
+  const units = [];
+  for (let i = 0; i < chars.length; i++) {
+    if (collapsePairs && chars[i] === "(" && chars[i + 3] === ")" &&
+        HAN.test(chars[i + 1] || "") && HAN.test(chars[i + 2] || "")) {
+      units.push({ text: chars.slice(i, i + 4).join(""), column: true });
+      i += 3;
+      continue;
+    }
+    units.push({ text: chars[i], column: HAN.test(chars[i]) });
+  }
+  return units;
+}
+
 /** Returns null when this line cannot be aligned, so the caller can fall back.
  *  Han and Japanese align one column per character; every other script aligns
  *  one column per whitespace-separated word. */
@@ -58,9 +82,20 @@ function rubyNode(unit, i, j) {
   // keeps its own punctuation; only the reading is tokenized this way.
   const readings = (charwise ? read.split(/[\s\-–—,.:;!?()]+/) : read.split(/\s+/))
     .filter(Boolean);
-  const tokens = charwise ? [...base] : base.split(/\s+/).filter(Boolean);
-  const columns = charwise ? tokens.filter((t) => HAN.test(t)).length : tokens.length;
-  if (columns !== readings.length) return null;
+
+  let units;
+  if (charwise) {
+    // Straight one-character-per-reading first; only if that does not add up
+    // do we try collapsing parenthesised pairs. Either way the counts must
+    // match exactly, so this can never silently mis-align a line.
+    units = charUnits(base, false);
+    if (units.filter((u) => u.column).length !== readings.length) {
+      units = charUnits(base, true);
+    }
+  } else {
+    units = base.split(/\s+/).filter(Boolean).map((t) => ({ text: t, column: true }));
+  }
+  if (units.filter((u) => u.column).length !== readings.length) return null;
 
   const p = el("p", "ln ruby-line");
   p.dataset.kind = unit.base.kind;
@@ -68,16 +103,16 @@ function rubyNode(unit, i, j) {
   p.dataset.align = charwise ? "char" : "word";
   p.lang = unit.base.render_lang;
   let k = 0;
-  for (const token of tokens) {
-    if (charwise && !HAN.test(token)) {
-      p.appendChild(document.createTextNode(token));   // spaces, punctuation
+  for (const u of units) {
+    if (!u.column) {
+      p.appendChild(document.createTextNode(u.text));   // spaces, punctuation
       continue;
     }
     // <ruby>/<rt> keeps the markup meaningful, but the base sits in its own
     // <span> so CSS can stack and left-align the two independently —
     // ruby-align has poor browser support.
     const ruby = document.createElement("ruby");
-    ruby.appendChild(el("span", "rb", token));
+    ruby.appendChild(el("span", "rb", u.text));
     const rt = document.createElement("rt");
     rt.textContent = readings[k++];
     ruby.appendChild(rt);
