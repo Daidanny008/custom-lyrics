@@ -78,8 +78,24 @@
         }
       }
     },
+    "nan-Hans": {
+      "label": "Min Nan (Simplified)",
+      "endonym": "闽南语",
+      "script": "han",
+      "render_lang": "zh-Hans",
+      "variants": {
+        "poj": {
+          "label": "POJ",
+          "kind": "romanization"
+        },
+        "tailo": {
+          "label": "Tâi-lô",
+          "kind": "romanization"
+        }
+      }
+    },
     "nan-Hant": {
-      "label": "Hokkien / Min Nan",
+      "label": "Min Nan (Traditional)",
       "endonym": "閩南語",
       "script": "han",
       "render_lang": "zh-Hant",
