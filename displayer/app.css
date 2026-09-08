@@ -206,10 +206,11 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 }
 .ruby-line .rb { display: block; line-height: 1.25; }
 /* Word columns are already wide, so they need neither the enlarged base nor
-   the very small reading that Han characters do. */
-.ruby-line[data-align="word"] { font-size: calc(1.02rem * var(--scale)); line-height: 1.5; }
-.ruby-line[data-align="word"] ruby { margin: 0 .5em .45em 0; }
-.ruby-line[data-align="word"] rt { font-size: .72em; }
+   the shrunken reading that Han characters do — the word and its romanization
+   sit at the same size, one above the other. */
+.ruby-line[data-align="word"] { font-size: calc(1.02rem * var(--scale)); line-height: 1.4; }
+.ruby-line[data-align="word"] ruby { margin: 0 .6em .5em 0; }
+.ruby-line[data-align="word"] rt { font-size: 1em; }
 .ruby-line rt {
   display: block;
   font-family: var(--font-roman);
