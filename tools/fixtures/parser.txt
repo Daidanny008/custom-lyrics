@@ -1,0 +1,14 @@
+[Verse 1]
+first line
+~
+  padded line  
+
+no label here
+[Chorus] is not a label mid-section
+
+[00:12.34]timestamped line
+[01:02:345]another timestamp
+~
+
+[Outro]
+tail

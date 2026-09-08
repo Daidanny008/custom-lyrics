@@ -31,7 +31,7 @@ S.initChrome();
 document.getElementById("theme").addEventListener("click", S.toggleTheme);
 document.getElementById("scale-up").addEventListener("click", () => S.bumpScale(0.1));
 document.getElementById("scale-down").addEventListener("click", () => S.bumpScale(-0.1));
-backBtn.addEventListener("click", () => S.goLibrary("", []));
+backBtn.addEventListener("click", () => S.goLibrary());
 
 (async function boot() {
   try {
@@ -74,7 +74,7 @@ function renderLibrary(route) {
 
   let query = route.q || "";
   let tags = [...(route.tags || [])];
-  let langs = [];
+  let langs = [...(route.langs || [])];
   search.value = query;
 
   const { tags: presentTags, languages } = presentFacets(INDEX.songs, INDEX);
@@ -119,10 +119,7 @@ function renderLibrary(route) {
         INDEX.songs.length ? "Nothing matches those filters." : "No songs indexed yet — run ./run.sh"));
     }
     count.textContent = `${matched.length} of ${INDEX.songs.length}`;
-    history.replaceState(null, "",
-      "#/" + (query || tags.length
-        ? "?" + new URLSearchParams({ ...(query && { q: query }), ...(tags.length && { tags: tags.join(",") }) })
-        : ""));
+    history.replaceState(null, "", S.libraryHash(query, tags, langs));
   }
 
   function open(id) { S.goSong(id, S.recall(id) || undefined); }
@@ -176,6 +173,8 @@ async function renderSong(route) {
   if (!selected.length) selected = defaultSelection(song);
   let mode = route.mode || DEFAULT_MODE;
   let who = route.who !== "0";   // on by default where attribution exists
+  // Only known once the original has been fetched and inspected, in draw().
+  let canAttribute = false;
 
   songCtx = { song, get selected() { return selected; }, toggle };
   document.addEventListener("keydown", songKeys);
@@ -222,8 +221,6 @@ async function renderSong(route) {
     drawChips();
     draw();
   });
-
-  let canAttribute = false;
 
   function toggle(key) {
     // Keep chip order stable regardless of click order.
@@ -276,15 +273,17 @@ async function renderSong(route) {
     }
   }
 
-  S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
   drawChips();
+  // Must follow draw(): canAttribute is unknown until the original is parsed,
+  // and writing the URL before then drops a shared ?who=0.
   await draw();
+  S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
 }
 
 function songKeys(e) {
   if (!songCtx || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.target.matches("input, textarea")) return;
-  if (e.key === "Escape") { S.goLibrary("", []); return; }
+  if (e.key === "Escape") { S.goLibrary(); return; }
   const n = parseInt(e.key, 10);
   if (n >= 1 && n <= 9 && songCtx.song.files[n - 1]) {
     e.preventDefault();

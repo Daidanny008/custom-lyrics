@@ -20,7 +20,8 @@ export function readRoute() {
       who: query.get("who"),   // null = default (on), "0" = explicitly off
     };
   }
-  return { view: "library", q: query.get("q") || "", tags: query.get("tags") ? query.get("tags").split(",") : [] };
+  const list = (k) => (query.get(k) ? query.get(k).split(",").filter(Boolean) : []);
+  return { view: "library", q: query.get("q") || "", tags: list("tags"), langs: list("langs") };
 }
 
 export function goSong(id, selected, mode, who) {
@@ -42,12 +43,19 @@ export function replaceSong(id, selected, mode, who) {
   history.replaceState(null, "", `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`);
 }
 
-export function goLibrary(q, tags) {
+/** The library's hash for a given filter state — one place, so the back button
+ *  and the live filter can never disagree about what belongs in the URL. */
+export function libraryHash(q, tags, langs) {
   const p = new URLSearchParams();
   if (q) p.set("q", q);
   if (tags && tags.length) p.set("tags", tags.join(","));
+  if (langs && langs.length) p.set("langs", langs.join(","));
   const qs = p.toString();
-  location.hash = `#/${qs ? "?" + qs : ""}`;
+  return `#/${qs ? "?" + qs : ""}`;
+}
+
+export function goLibrary(q, tags, langs) {
+  location.hash = libraryHash(q, tags, langs);
 }
 
 export const remember = (id, sel) => localStorage.setItem(LS_PREFIX + id, sel.join(","));
