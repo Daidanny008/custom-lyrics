@@ -16,7 +16,7 @@ export function readRoute() {
       view: "song",
       id: decodeURIComponent(m[1]),
       selected: query.get("v") ? query.get("v").split(",").filter(Boolean) : null,
-      mode: query.get("mode") || "line",
+      mode: query.get("mode") || "columns",
     };
   }
   return { view: "library", q: query.get("q") || "", tags: query.get("tags") ? query.get("tags").split(",") : [] };
@@ -25,7 +25,7 @@ export function readRoute() {
 export function goSong(id, selected, mode) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
-  if (mode && mode !== "line") q.set("mode", mode);
+  if (mode && mode !== "columns") q.set("mode", mode);
   const qs = q.toString();
   location.hash = `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`;
 }
@@ -34,7 +34,7 @@ export function goSong(id, selected, mode) {
 export function replaceSong(id, selected, mode) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
-  if (mode && mode !== "line") q.set("mode", mode);
+  if (mode && mode !== "columns") q.set("mode", mode);
   const qs = q.toString();
   history.replaceState(null, "", `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`);
 }

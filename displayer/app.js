@@ -1,12 +1,12 @@
 import { parseSections } from "./lib/parse.js";
-import { renderLyrics, resolveMode } from "./lib/render.js";
+import { renderLyrics, resolveMode, DEFAULT_MODE } from "./lib/render.js";
 import { filterSongs, songRow, presentFacets, artistLine, bylineFor } from "./lib/library.js";
 import * as S from "./lib/state.js";
 
 const MODE_LABELS = {
+  columns: "by column",   // whole stanza per version, side by side (default)
   line: "by line",        // every version of a line, stacked
   section: "by section",  // whole stanza per version, one after another
-  columns: "by column",   // whole stanza per version, side by side
 };
 
 const app = document.getElementById("app");
@@ -170,7 +170,7 @@ async function renderSong(route) {
   let selected = (route.selected || S.recall(song.id) || defaultSelection(song))
     .filter((k) => valid.has(k));
   if (!selected.length) selected = defaultSelection(song);
-  let mode = route.mode || "line";
+  let mode = route.mode || DEFAULT_MODE;
 
   songCtx = { song, get selected() { return selected; }, toggle };
   document.addEventListener("keydown", songKeys);
@@ -193,7 +193,7 @@ async function renderSong(route) {
       chips.appendChild(b);
     });
     modeBtn.textContent = MODE_LABELS[resolveMode(mode)];
-    modeBtn.title = "Cycle: by line → by section → by column";
+    modeBtn.title = "Cycle: by column → by line → by section";
   }
 
   modeBtn.addEventListener("click", () => {

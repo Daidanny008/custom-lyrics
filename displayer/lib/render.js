@@ -141,11 +141,12 @@ function renderByColumns(root, units, sectionCount) {
   }
 }
 
-// Line mode at any count; "section" and "columns" are explicit opt-ins.
-const MODES = { section: renderBySection, columns: renderByColumns, line: renderByLine };
+// Columns are the default; "line" and "section" are explicit opt-ins.
+const MODES = { columns: renderByColumns, line: renderByLine, section: renderBySection };
+export const DEFAULT_MODE = "columns";
 
 export function resolveMode(mode) {
-  return mode in MODES ? mode : "line";
+  return mode in MODES ? mode : DEFAULT_MODE;
 }
 
 export function renderLyrics(root, views, mode) {
