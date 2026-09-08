@@ -226,6 +226,20 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 .block + .block { margin-top: .55rem; }
 .block.sep { padding-top: .55rem; border-top: 1px dashed var(--rule); }
 
+/* column mode: the stanza stays whole, versions sit side by side. minmax(0,1fr)
+   rather than 1fr so a long unbroken line wraps instead of widening its column. */
+.cols {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  gap: 1.9rem;
+  align-items: start;
+}
+.col > .ln + .ln { margin-top: .1rem; }
+/* Too narrow to sit side by side — stack the columns rather than crush them. */
+@media (max-width: 720px) {
+  .cols { grid-template-columns: 1fr; gap: .9rem; }
+}
+
 /* line mode: one group per line position */
 .group { margin-bottom: .95rem; }
 /* With a single version there is nothing to hold together, so the group gap

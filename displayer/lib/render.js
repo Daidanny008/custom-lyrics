@@ -123,9 +123,29 @@ function renderByLine(root, units, sectionCount) {
   }
 }
 
-// Line mode at any count; "section" is an explicit opt-in.
+/** Stanzas stay whole and the versions sit side by side, one column each. */
+function renderByColumns(root, units, sectionCount) {
+  for (let i = 0; i < sectionCount; i++) {
+    const sec = el("section", "sec");
+    const cols = el("div", "cols");
+    cols.style.setProperty("--cols", String(units.length));
+    for (const unit of units) {
+      const col = el("div", "col");
+      col.dataset.kind = (unit.view || unit.base).kind;
+      const n = (unit.view || unit.base).sections[i].lines.length;
+      for (let j = 0; j < n; j++) appendUnitLine(col, unit, i, j);
+      cols.appendChild(col);
+    }
+    sec.appendChild(cols);
+    root.appendChild(sec);
+  }
+}
+
+// Line mode at any count; "section" and "columns" are explicit opt-ins.
+const MODES = { section: renderBySection, columns: renderByColumns, line: renderByLine };
+
 export function resolveMode(mode) {
-  return mode === "section" ? "section" : "line";
+  return mode in MODES ? mode : "line";
 }
 
 export function renderLyrics(root, views, mode) {
@@ -139,5 +159,5 @@ export function renderLyrics(root, views, mode) {
   const resolved = resolveMode(mode);
   root.dataset.mode = resolved;
   root.dataset.versions = units.length;   // a ruby pair counts as one
-  (resolved === "section" ? renderBySection : renderByLine)(root, units, sectionCount);
+  MODES[resolved](root, units, sectionCount);
 }

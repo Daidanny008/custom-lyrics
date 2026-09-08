@@ -1,6 +1,6 @@
 // Hash routing + per-song persistence.
 //   #/                                     library
-//   #/song/<id>?v=ru,ru.translit&mode=auto song
+//   #/song/<id>?v=ru,ru.translit&mode=columns  song
 
 const LS_PREFIX = "custom-lyrics:sel:";
 const LS_THEME = "custom-lyrics:theme";
@@ -25,7 +25,7 @@ export function readRoute() {
 export function goSong(id, selected, mode) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
-  if (mode === "section") q.set("mode", mode);
+  if (mode && mode !== "line") q.set("mode", mode);
   const qs = q.toString();
   location.hash = `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`;
 }
@@ -34,7 +34,7 @@ export function goSong(id, selected, mode) {
 export function replaceSong(id, selected, mode) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
-  if (mode === "section") q.set("mode", mode);
+  if (mode && mode !== "line") q.set("mode", mode);
   const qs = q.toString();
   history.replaceState(null, "", `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`);
 }

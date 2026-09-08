@@ -3,6 +3,12 @@ import { renderLyrics, resolveMode } from "./lib/render.js";
 import { filterSongs, songRow, presentFacets, artistLine, bylineFor } from "./lib/library.js";
 import * as S from "./lib/state.js";
 
+const MODE_LABELS = {
+  line: "by line",        // every version of a line, stacked
+  section: "by section",  // whole stanza per version, one after another
+  columns: "by column",   // whole stanza per version, side by side
+};
+
 const app = document.getElementById("app");
 const crumb = document.getElementById("crumb");
 const backBtn = document.getElementById("back");
@@ -164,7 +170,7 @@ async function renderSong(route) {
   let selected = (route.selected || S.recall(song.id) || defaultSelection(song))
     .filter((k) => valid.has(k));
   if (!selected.length) selected = defaultSelection(song);
-  let mode = route.mode || "auto";
+  let mode = route.mode || "line";
 
   songCtx = { song, get selected() { return selected; }, toggle };
   document.addEventListener("keydown", songKeys);
@@ -186,12 +192,13 @@ async function renderSong(route) {
       b.addEventListener("click", () => toggle(key));
       chips.appendChild(b);
     });
-    modeBtn.textContent = resolveMode(mode) === "section" ? "by section" : "by line";
-    modeBtn.title = "Switch between line-by-line and whole-section blocks";
+    modeBtn.textContent = MODE_LABELS[resolveMode(mode)];
+    modeBtn.title = "Cycle: by line → by section → by column";
   }
 
   modeBtn.addEventListener("click", () => {
-    mode = resolveMode(mode) === "section" ? "line" : "section";
+    const order = Object.keys(MODE_LABELS);
+    mode = order[(order.indexOf(resolveMode(mode)) + 1) % order.length];
     S.replaceSong(song.id, selected, mode);
     drawChips();
     draw();
