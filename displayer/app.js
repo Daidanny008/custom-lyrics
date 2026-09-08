@@ -175,7 +175,7 @@ async function renderSong(route) {
     .filter((k) => valid.has(k));
   if (!selected.length) selected = defaultSelection(song);
   let mode = route.mode || DEFAULT_MODE;
-  let who = Boolean(route.who);
+  let who = route.who !== "0";   // on by default where attribution exists
 
   songCtx = { song, get selected() { return selected; }, toggle };
   document.addEventListener("keydown", songKeys);
@@ -210,7 +210,7 @@ async function renderSong(route) {
   // original actually carries "name：" labels.
   whoBtn.addEventListener("click", () => {
     who = !who;
-    S.replaceSong(song.id, selected, mode, who);
+    S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
     drawChips();
     draw();
   });
@@ -218,7 +218,7 @@ async function renderSong(route) {
   modeBtn.addEventListener("click", () => {
     const order = Object.keys(MODE_LABELS);
     mode = order[(order.indexOf(resolveMode(mode)) + 1) % order.length];
-    S.replaceSong(song.id, selected, mode, who);
+    S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
     drawChips();
     draw();
   });
@@ -231,7 +231,7 @@ async function renderSong(route) {
     next.has(key) ? next.delete(key) : next.add(key);
     selected = song.files.map(keyOf).filter((k) => next.has(k));
     S.remember(song.id, selected);
-    S.replaceSong(song.id, selected, mode, who);
+    S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
     drawChips();
     draw();
   }
@@ -259,10 +259,11 @@ async function renderSong(route) {
         // one recording. "/" means separate recordings and "·" a fixed credit
         // list, and neither has anything to attribute line by line.
         canAttribute = Boolean(found) && song.artist_separator === "X";
-        if (who && canAttribute) {
-          speakers = found;
-          // labels move to the column, so take them off the lyric line
+        if (canAttribute) {
+          // The label says who sings, not what is sung — it never belongs in
+          // the lyric line, whether or not the column is on show.
           views = views.map((v) => (v === original ? stripSpeakers(v) : v));
+          if (who) speakers = found;
         }
       } else {
         canAttribute = false;
@@ -275,7 +276,7 @@ async function renderSong(route) {
     }
   }
 
-  S.replaceSong(song.id, selected, mode, who);
+  S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
   drawChips();
   await draw();
 }
