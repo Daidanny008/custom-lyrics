@@ -243,7 +243,9 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 /* The attribution column is only as wide as the longest name, so it never
    steals width from the lyrics. */
 .cols[data-who] {
-  grid-template-columns: max-content repeat(var(--cols, 1), minmax(0, 1fr));
+  /* --who-w is measured after the first paint; max-content is the fallback
+     for that one frame. */
+  grid-template-columns: var(--who-w, max-content) repeat(var(--cols, 1), minmax(0, 1fr));
 }
 /* Same size, colour and line-height as the lyric it names, so it sits on the
    line rather than floating above it. */

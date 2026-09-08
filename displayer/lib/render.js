@@ -291,4 +291,18 @@ export function renderLyrics(root, views, mode, speakers) {
   root.dataset.mode = resolved;
   root.dataset.versions = units.filter((u) => !u.speakers).length;  // ruby pair counts as one
   MODES[resolved](root, units, sectionCount);
+
+  // Each stanza is its own grid, so a max-content attribution track sizes to
+  // that stanza's widest name — a two-character singer pushes only its own
+  // stanza's lyrics right. Measure the widest across the whole song and pin
+  // every track to it so the lyric columns line up down the page.
+  if (speakers && resolved === "columns") {
+    let widest = 0;
+    for (const grid of root.querySelectorAll(".cols[data-who]")) {
+      widest = Math.max(widest, grid.children[0].getBoundingClientRect().width);
+    }
+    root.style.setProperty("--who-w", `${Math.ceil(widest)}px`);
+  } else {
+    root.style.removeProperty("--who-w");
+  }
 }
