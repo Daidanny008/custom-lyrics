@@ -20,8 +20,10 @@ export function filterSongs(songs, query, tags, langs) {
 }
 
 export function artistLine(song) {
+  // `romanized` stays out of the display but remains in the search blob, so
+  // typing "eason chan" still finds 陈奕迅.
   return (song.artist || [])
-    .map((a) => (a.romanized && a.romanized !== a.name ? `${a.name} (${a.romanized})` : a.name))
+    .map((a) => a.name)
     .join(` ${song.artist_separator || "·"} `);
 }
 
