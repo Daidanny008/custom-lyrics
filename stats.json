@@ -1,31 +1,31 @@
 {
   "updated": "2026-09-08",
-  "songs": 7,
-  "lyric_files": 17,
-  "lines": 648,
+  "songs": 8,
+  "lyric_files": 20,
+  "lines": 894,
   "original_languages": {
+    "Latina": 2,
     "Français": 2,
     "粤语": 2,
-    "Latina": 1,
     "Русский": 1,
     "普通话": 1
   },
   "languages_present": {
-    "English": 4,
-    "普通话": 4,
+    "普通话": 5,
+    "English": 5,
+    "Latina": 2,
     "Français": 2,
     "粤语": 2,
-    "Latina": 1,
     "Русский": 1
   },
   "versions_by_kind": {
-    "original": 7,
-    "translation": 7,
+    "translation": 9,
+    "original": 8,
     "romanization": 3
   },
   "tags": {
+    "录过的": 3,
     "会唱的": 3,
-    "录过的": 2,
     "戏腔": 1
   }
 }
