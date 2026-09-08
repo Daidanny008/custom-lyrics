@@ -17,24 +17,27 @@ export function readRoute() {
       id: decodeURIComponent(m[1]),
       selected: query.get("v") ? query.get("v").split(",").filter(Boolean) : null,
       mode: query.get("mode") || "columns",
+      who: query.get("who") === "1",
     };
   }
   return { view: "library", q: query.get("q") || "", tags: query.get("tags") ? query.get("tags").split(",") : [] };
 }
 
-export function goSong(id, selected, mode) {
+export function goSong(id, selected, mode, who) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
   if (mode && mode !== "columns") q.set("mode", mode);
+  if (who) q.set("who", "1");
   const qs = q.toString();
   location.hash = `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`;
 }
 
 /** Replace the hash without pushing a history entry - for chip toggles. */
-export function replaceSong(id, selected, mode) {
+export function replaceSong(id, selected, mode, who) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
   if (mode && mode !== "columns") q.set("mode", mode);
+  if (who) q.set("who", "1");
   const qs = q.toString();
   history.replaceState(null, "", `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`);
 }

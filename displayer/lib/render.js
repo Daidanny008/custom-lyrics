@@ -6,6 +6,46 @@
 // containing one would never align.
 const HAN = /[㐀-䶿一-鿿豈-﫿]|[\u{20000}-\u{3134F}]/u;
 
+// A leading "name：" on a line marks who sings it. Kept deliberately tight —
+// a short prefix before a full-width colon — so it cannot swallow a lyric that
+// merely contains a colon.
+const SPEAKER = /^([^：:\s]{1,8})：\s*/;
+
+/** Pull speaker labels out of a view. Returns null if it carries none.
+ *  A line with no label continues the previous singer, and `show` is true only
+ *  where the singer changes, so the column reads like a script rather than
+ *  repeating a name down every row. */
+export function extractSpeakers(view) {
+  let found = false, current = null, previous = null;
+  const labels = [], show = [];
+  for (const sec of view.sections) {
+    const secLabels = [], secShow = [];
+    sec.lines.forEach((line, j) => {
+      const m = line == null ? null : SPEAKER.exec(line);
+      if (m) { found = true; current = m[1]; }
+      secLabels.push(current);
+      // Always name the singer at the top of a stanza, even when it carried
+      // over — otherwise a stanza can open with a blank attribution.
+      secShow.push(j === 0 || current !== previous);
+      previous = current;
+    });
+    labels.push(secLabels);
+    show.push(secShow);
+  }
+  return found ? { labels, show } : null;
+}
+
+/** The label now lives in its own column, so take it off the lyric line. */
+export function stripSpeakers(view) {
+  return {
+    ...view,
+    sections: view.sections.map((sec) => ({
+      ...sec,
+      lines: sec.lines.map((l) => (l == null ? l : l.replace(SPEAKER, ""))),
+    })),
+  };
+}
+
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -121,7 +161,22 @@ function rubyNode(unit, i, j) {
   return p;
 }
 
+/** How many lines a unit holds in section i. The attribution unit carries no
+ *  view of its own, so it reports the shape it was built from. */
+const unitLines = (unit, i) =>
+  unit.speakers ? unit.speakers.labels[i].length
+                : (unit.view || unit.base).sections[i].lines.length;
+
+/** The first real lyric unit — never the attribution column. */
+const lyricRef = (units) => units.find((u) => !u.speakers);
+
 function appendUnitLine(parent, unit, i, j) {
+  if (unit.speakers) {
+    const p = el("p", "ln speaker");
+    p.textContent = unit.speakers.show[i][j] ? (unit.speakers.labels[i][j] || "") : "";
+    parent.appendChild(p);
+    return;
+  }
   if (unit.view) {
     parent.appendChild(lineNode(unit.view, unit.view.sections[i].lines[j]));
     return;
@@ -139,9 +194,9 @@ function renderBySection(root, units, sectionCount) {
     const sec = el("section", "sec");
     units.forEach((unit, ui) => {
       const block = el("div", "block");
-      block.dataset.kind = (unit.view || unit.base).kind;
+      if (!unit.speakers) block.dataset.kind = (unit.view || unit.base).kind;
       if (ui > 0) block.classList.add("sep");
-      const n = (unit.view || unit.base).sections[i].lines.length;
+      const n = unitLines(unit, i);
       for (let j = 0; j < n; j++) appendUnitLine(block, unit, i, j);
       sec.appendChild(block);
     });
@@ -153,7 +208,7 @@ function renderBySection(root, units, sectionCount) {
 function renderByLine(root, units, sectionCount) {
   for (let i = 0; i < sectionCount; i++) {
     const sec = el("section", "sec");
-    const n = (units[0].view || units[0].base).sections[i].lines.length;
+    const n = unitLines(lyricRef(units), i);
     for (let j = 0; j < n; j++) {
       const group = el("div", "group");
       for (const unit of units) appendUnitLine(group, unit, i, j);
@@ -171,12 +226,14 @@ function renderByColumns(root, units, sectionCount) {
   for (let i = 0; i < sectionCount; i++) {
     const sec = el("section", "sec");
     const grid = el("div", "cols");
-    grid.style.setProperty("--cols", String(units.length));
-    const n = (units[0].view || units[0].base).sections[i].lines.length;
+    const lyricCols = units.filter((u) => !u.speakers).length;
+    grid.style.setProperty("--cols", String(lyricCols));
+    if (units.some((u) => u.speakers)) grid.dataset.who = "";
+    const n = unitLines(lyricRef(units), i);
     for (let j = 0; j < n; j++) {
       for (const unit of units) {
         const cell = el("div", "cell");
-        cell.dataset.kind = (unit.view || unit.base).kind;
+        if (!unit.speakers) cell.dataset.kind = (unit.view || unit.base).kind;
         appendUnitLine(cell, unit, i, j);
         grid.appendChild(cell);
       }
@@ -194,16 +251,17 @@ export function resolveMode(mode) {
   return mode in MODES ? mode : DEFAULT_MODE;
 }
 
-export function renderLyrics(root, views, mode) {
+export function renderLyrics(root, views, mode, speakers) {
   root.textContent = "";
   if (!views.length) {
     root.appendChild(el("p", "empty-note", "No versions selected — pick one above."));
     return;
   }
   const units = toUnits(views);
+  if (speakers) units.unshift({ speakers });
   const sectionCount = views[0].sections.length;
   const resolved = resolveMode(mode);
   root.dataset.mode = resolved;
-  root.dataset.versions = units.length;   // a ruby pair counts as one
+  root.dataset.versions = units.filter((u) => !u.speakers).length;  // ruby pair counts as one
   MODES[resolved](root, units, sectionCount);
 }

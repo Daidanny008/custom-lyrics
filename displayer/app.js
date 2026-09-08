@@ -1,5 +1,6 @@
 import { parseSections } from "./lib/parse.js";
-import { renderLyrics, resolveMode, DEFAULT_MODE } from "./lib/render.js";
+import { renderLyrics, resolveMode, DEFAULT_MODE, extractSpeakers, stripSpeakers }
+  from "./lib/render.js";
 import { filterSongs, songRow, presentFacets, artistLine, bylineFor } from "./lib/library.js";
 import * as S from "./lib/state.js";
 
@@ -174,12 +175,14 @@ async function renderSong(route) {
     .filter((k) => valid.has(k));
   if (!selected.length) selected = defaultSelection(song);
   let mode = route.mode || DEFAULT_MODE;
+  let who = Boolean(route.who);
 
   songCtx = { song, get selected() { return selected; }, toggle };
   document.addEventListener("keydown", songKeys);
 
   const chips = document.getElementById("chips");
   const modeBtn = document.getElementById("mode");
+  const whoBtn = document.getElementById("who");
 
   function drawChips() {
     chips.textContent = "";
@@ -197,15 +200,30 @@ async function renderSong(route) {
     });
     modeBtn.textContent = MODE_LABELS[resolveMode(mode)];
     modeBtn.title = "Cycle: by column → by line → by section";
+    whoBtn.hidden = !canAttribute;
+    whoBtn.textContent = who ? "singers ✓" : "singers";
+    whoBtn.classList.toggle("on", who);
+    whoBtn.title = "Show who sings each line in its own column";
   }
+
+  // Only a collaboration can have anything to attribute, and only if the
+  // original actually carries "name：" labels.
+  whoBtn.addEventListener("click", () => {
+    who = !who;
+    S.replaceSong(song.id, selected, mode, who);
+    drawChips();
+    draw();
+  });
 
   modeBtn.addEventListener("click", () => {
     const order = Object.keys(MODE_LABELS);
     mode = order[(order.indexOf(resolveMode(mode)) + 1) % order.length];
-    S.replaceSong(song.id, selected, mode);
+    S.replaceSong(song.id, selected, mode, who);
     drawChips();
     draw();
   });
+
+  let canAttribute = false;
 
   function toggle(key) {
     // Keep chip order stable regardless of click order.
@@ -213,7 +231,7 @@ async function renderSong(route) {
     next.has(key) ? next.delete(key) : next.add(key);
     selected = song.files.map(keyOf).filter((k) => next.has(k));
     S.remember(song.id, selected);
-    S.replaceSong(song.id, selected, mode);
+    S.replaceSong(song.id, selected, mode, who);
     drawChips();
     draw();
   }
@@ -232,15 +250,29 @@ async function renderSong(route) {
   async function draw() {
     const chosen = song.files.filter((f) => selected.includes(keyOf(f)));
     try {
-      const views = await Promise.all(chosen.map(async (f) => ({ ...f, sections: await loadFile(f) })));
-      renderLyrics(lyrics, views, mode);
+      let views = await Promise.all(chosen.map(async (f) => ({ ...f, sections: await loadFile(f) })));
+      let speakers = null;
+      const original = views.find((v) => v.kind === "original");
+      if (original) {
+        const found = extractSpeakers(original);
+        canAttribute = Boolean(found) && song.artist.length > 1;
+        if (who && canAttribute) {
+          speakers = found;
+          // labels move to the column, so take them off the lyric line
+          views = views.map((v) => (v === original ? stripSpeakers(v) : v));
+        }
+      } else {
+        canAttribute = false;
+      }
+      drawChips();
+      renderLyrics(lyrics, views, mode, speakers);
     } catch (err) {
       lyrics.textContent = "";
       lyrics.appendChild(el("div", "fatal", `Could not load a lyric file — ${err.message}`));
     }
   }
 
-  S.replaceSong(song.id, selected, mode);
+  S.replaceSong(song.id, selected, mode, who);
   drawChips();
   await draw();
 }

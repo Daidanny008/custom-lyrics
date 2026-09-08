@@ -152,6 +152,7 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
   background: none; border: 1px solid var(--rule); color: var(--fg-faint);
 }
 .mode-btn:hover { color: var(--fg); border-color: var(--fg-faint); }
+.mode-btn.on { background: var(--accent); border-color: var(--accent); color: #17140e; font-weight: 600; }
 
 /* ---------------------------------------------------------------- lyrics */
 .lyrics { margin-top: 1.2rem; }
@@ -234,6 +235,20 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
   column-gap: 1.9rem;
   row-gap: .2rem;
   align-items: start;   /* a taller wrapped cell must not centre its neighbours */
+}
+/* The attribution column is only as wide as the longest name, so it never
+   steals width from the lyrics. */
+.cols[data-who] {
+  grid-template-columns: max-content repeat(var(--cols, 1), minmax(0, 1fr));
+}
+.ln.speaker {
+  font-family: var(--font-ui);
+  font-size: .8em;
+  color: var(--fg-faint);
+  white-space: nowrap;
+  padding-left: 0;
+  text-indent: 0;
+  padding-right: .3rem;
 }
 /* Too narrow to sit side by side — stack the columns rather than crush them. */
 @media (max-width: 720px) {
