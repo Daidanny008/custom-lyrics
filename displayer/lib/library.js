@@ -46,6 +46,12 @@ export function songRow(song, index, onOpen) {
     badges.appendChild(b);
   }
   meta.appendChild(badges);
+  if (song.tags.length) {
+    // Text-only with a # so tags never read as language badges.
+    const tags = el("div", "row-tags");
+    for (const t of song.tags) tags.appendChild(el("span", "tag-badge", `#${t}`));
+    meta.appendChild(tags);
+  }
   row.appendChild(meta);
 
   row.addEventListener("click", () => onOpen(song.id));

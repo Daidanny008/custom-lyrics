@@ -100,6 +100,8 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
   background: var(--bg-chip); color: var(--fg-faint);
 }
 .badge.is-original { color: var(--accent); }
+.row-tags { display: flex; gap: .4rem; }
+.tag-badge { font-size: .65rem; color: var(--fg-faint); white-space: nowrap; }
 .count { font-size: .72rem; color: var(--fg-faint); margin-top: 1rem; }
 
 /* ---------------------------------------------------------------- chips */
