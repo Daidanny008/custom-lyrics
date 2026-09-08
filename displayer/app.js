@@ -159,6 +159,9 @@ async function renderSong(route) {
   const named = Boolean(artistLine(song));
   const sub = [named ? song.album : null, song.year].filter(Boolean).join(" · ");
   if (sub) byline.appendChild(el("span", "byline-sub", ` — ${sub}`));
+  // A traditional song may have neither performer nor source; drop the empty
+  // element rather than leaving a gap under the title.
+  if (!byline.textContent) byline.remove();
 
   const tagline = document.getElementById("tags");
   for (const t of song.tags) tagline.appendChild(el("span", "tag", `#${t}`));
