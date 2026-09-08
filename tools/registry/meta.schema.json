@@ -83,6 +83,11 @@
     },
     "notes": {
       "type": "string"
+    },
+    "artist_separator": {
+      "type": "string",
+      "maxLength": 3,
+      "description": "How to join multiple artists. Default ' · ' means they performed together; ' / ' means separate recordings."
     }
   }
 }

@@ -22,7 +22,7 @@ export function filterSongs(songs, query, tags, langs) {
 export function artistLine(song) {
   return (song.artist || [])
     .map((a) => (a.romanized && a.romanized !== a.name ? `${a.name} (${a.romanized})` : a.name))
-    .join(" · ");
+    .join(` ${song.artist_separator || "·"} `);
 }
 
 /** Artist if known, else the album or show it came from, else nothing. */

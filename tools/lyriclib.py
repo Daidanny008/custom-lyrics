@@ -306,6 +306,7 @@ def to_index_entry(song: Song, langs: dict):
         "title": song.meta.get("title", {}),
         "display_title": display_title(song),
         "artist": song.meta.get("artist", []),
+        "artist_separator": song.meta.get("artist_separator"),
         "album": song.meta.get("album"),
         "year": song.meta.get("year"),
         "original_languages": song.meta.get("original_languages", []),
