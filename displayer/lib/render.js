@@ -25,13 +25,13 @@ function lineNode(view, text) {
   return p;
 }
 
-/** A Han-script original plus its own romanization becomes one ruby unit. */
+/** An original plus its own romanization becomes one ruby unit. */
 function toUnits(views) {
   const used = new Set();
   const units = [];
   for (const v of views) {
     if (used.has(v)) continue;
-    if (!v.variant && (v.script === "han" || v.script === "japanese")) {
+    if (!v.variant) {
       const r = views.find((o) => o !== v && !used.has(o) && o.lang === v.lang &&
         (o.kind === "romanization" || o.kind === "phonetic"));
       if (r) { used.add(v); used.add(r); units.push({ base: v, ruby: r }); continue; }
@@ -42,34 +42,41 @@ function toUnits(views) {
   return units;
 }
 
-/** Returns null when this line cannot be aligned, so the caller can fall back. */
+/** Returns null when this line cannot be aligned, so the caller can fall back.
+ *  Han and Japanese align one column per character; every other script aligns
+ *  one column per whitespace-separated word. */
 function rubyNode(unit, i, j) {
   const base = unit.base.sections[i].lines[j];
   const read = unit.ruby.sections[i].lines[j];
   if (base == null || read == null) return null;
-  const syllables = read.split(/\s+/).filter(Boolean);
-  const chars = [...base];
-  if (chars.filter((c) => HAN.test(c)).length !== syllables.length) return null;
+
+  const script = unit.base.script;
+  const charwise = script === "han" || script === "japanese";
+  const readings = read.split(/\s+/).filter(Boolean);
+  const tokens = charwise ? [...base] : base.split(/\s+/).filter(Boolean);
+  const columns = charwise ? tokens.filter((t) => HAN.test(t)).length : tokens.length;
+  if (columns !== readings.length) return null;
 
   const p = el("p", "ln ruby-line");
   p.dataset.kind = unit.base.kind;
-  p.dataset.script = unit.base.script;
+  p.dataset.script = script;
+  p.dataset.align = charwise ? "char" : "word";
   p.lang = unit.base.render_lang;
   let k = 0;
-  for (const ch of chars) {
-    if (HAN.test(ch)) {
-      // <ruby>/<rt> keeps the markup meaningful, but the character sits in its
-      // own <span> so CSS can stack and left-align the two independently —
-      // ruby-align has poor browser support.
-      const ruby = document.createElement("ruby");
-      ruby.appendChild(el("span", "rb", ch));
-      const rt = document.createElement("rt");
-      rt.textContent = syllables[k++];
-      ruby.appendChild(rt);
-      p.appendChild(ruby);
-    } else {
-      p.appendChild(document.createTextNode(ch));   // spaces, punctuation
+  for (const token of tokens) {
+    if (charwise && !HAN.test(token)) {
+      p.appendChild(document.createTextNode(token));   // spaces, punctuation
+      continue;
     }
+    // <ruby>/<rt> keeps the markup meaningful, but the base sits in its own
+    // <span> so CSS can stack and left-align the two independently —
+    // ruby-align has poor browser support.
+    const ruby = document.createElement("ruby");
+    ruby.appendChild(el("span", "rb", token));
+    const rt = document.createElement("rt");
+    rt.textContent = readings[k++];
+    ruby.appendChild(rt);
+    p.appendChild(ruby);
   }
   return p;
 }
