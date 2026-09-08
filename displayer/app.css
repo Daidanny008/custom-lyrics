@@ -91,13 +91,11 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 }
 .song-row:hover { background: var(--bg-raised); }
 .song-main { flex: 1; min-width: 0; }
-/* One size for all three parts — the chain is distinguished by colour and by
-   the title's serif, not by scale. */
-.song-title, .song-artist, .song-source, .song-sep { font-size: 1.02rem; }
+/* All three parts read as peers: same size, same colour. Only the title's
+   serif and the separators distinguish them. */
+.song-title, .song-artist, .song-source { font-size: 1.02rem; color: var(--fg); }
 .song-title { font-family: var(--font-latin); }
-.song-sep { color: var(--fg-faint); margin: 0 .45rem; }
-.song-artist { color: var(--fg-dim); }
-.song-source { color: var(--fg-faint); }
+.song-sep { font-size: 1.02rem; color: var(--fg-faint); margin: 0 .45rem; }
 .song-meta { display: flex; align-items: center; gap: .5rem; flex: none; }
 .badges { display: flex; gap: .25rem; }
 .badge {
