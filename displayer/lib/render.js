@@ -52,7 +52,12 @@ function rubyNode(unit, i, j) {
 
   const script = unit.base.script;
   const charwise = script === "han" || script === "japanese";
-  const readings = read.split(/\s+/).filter(Boolean);
+  // Character alignment needs one reading per character, but romanizations
+  // group syllables into words — Tâi-lô's tshù-lāi is two characters. So split
+  // the reading on hyphens and punctuation too, not just spaces. The base line
+  // keeps its own punctuation; only the reading is tokenized this way.
+  const readings = (charwise ? read.split(/[\s\-–—,.:;!?()]+/) : read.split(/\s+/))
+    .filter(Boolean);
   const tokens = charwise ? [...base] : base.split(/\s+/).filter(Boolean);
   const columns = charwise ? tokens.filter((t) => HAN.test(t)).length : tokens.length;
   if (columns !== readings.length) return null;
