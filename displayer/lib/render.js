@@ -163,20 +163,25 @@ function renderByLine(root, units, sectionCount) {
   }
 }
 
-/** Stanzas stay whole and the versions sit side by side, one column each. */
+/** Stanzas stay whole and the versions sit side by side, one column each.
+ *  Cells are placed row by row into one grid rather than stacked per column,
+ *  so line j of every version shares a grid row and stays level even when the
+ *  versions wrap to different heights. */
 function renderByColumns(root, units, sectionCount) {
   for (let i = 0; i < sectionCount; i++) {
     const sec = el("section", "sec");
-    const cols = el("div", "cols");
-    cols.style.setProperty("--cols", String(units.length));
-    for (const unit of units) {
-      const col = el("div", "col");
-      col.dataset.kind = (unit.view || unit.base).kind;
-      const n = (unit.view || unit.base).sections[i].lines.length;
-      for (let j = 0; j < n; j++) appendUnitLine(col, unit, i, j);
-      cols.appendChild(col);
+    const grid = el("div", "cols");
+    grid.style.setProperty("--cols", String(units.length));
+    const n = (units[0].view || units[0].base).sections[i].lines.length;
+    for (let j = 0; j < n; j++) {
+      for (const unit of units) {
+        const cell = el("div", "cell");
+        cell.dataset.kind = (unit.view || unit.base).kind;
+        appendUnitLine(cell, unit, i, j);
+        grid.appendChild(cell);
+      }
     }
-    sec.appendChild(cols);
+    sec.appendChild(grid);
     root.appendChild(sec);
   }
 }

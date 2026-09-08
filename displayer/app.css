@@ -231,10 +231,10 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 .cols {
   display: grid;
   grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
-  gap: 1.9rem;
-  align-items: start;
+  column-gap: 1.9rem;
+  row-gap: .2rem;
+  align-items: start;   /* a taller wrapped cell must not centre its neighbours */
 }
-.col > .ln + .ln { margin-top: .1rem; }
 /* Too narrow to sit side by side — stack the columns rather than crush them. */
 @media (max-width: 720px) {
   .cols { grid-template-columns: 1fr; gap: .9rem; }
