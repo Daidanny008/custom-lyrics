@@ -255,7 +255,10 @@ async function renderSong(route) {
       const original = views.find((v) => v.kind === "original");
       if (original) {
         const found = extractSpeakers(original);
-        canAttribute = Boolean(found) && song.artist.length > 1;
+        // "X" is the collaboration separator — the artists trade lines within
+        // one recording. "/" means separate recordings and "·" a fixed credit
+        // list, and neither has anything to attribute line by line.
+        canAttribute = Boolean(found) && song.artist_separator === "X";
         if (who && canAttribute) {
           speakers = found;
           // labels move to the column, so take them off the lyric line
