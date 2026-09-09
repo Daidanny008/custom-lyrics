@@ -40,17 +40,26 @@ export function extractSpeakers(view) {
 /** Per-line language labels from a 1-based section -> language map. A song
  *  that switches language mid-text has one file, so the column has to come
  *  from metadata rather than from anything marked up in the text. */
-export function sectionLanguages(view, mapping, fallback, labelOf) {
+export function sectionLanguages(view, mapping, fallback, infoOf) {
   if (!mapping) return null;
-  const labels = [], show = [];
+  const labels = [], show = [], meta = [];
   view.sections.forEach((sec, i) => {
-    const label = labelOf(mapping[String(i + 1)] || fallback);
-    labels.push(sec.lines.map(() => label));
+    const info = infoOf(mapping[String(i + 1)] || fallback);
+    labels.push(sec.lines.map(() => info.label));
     // The language is constant within a section, so it is named once at the
     // top of each stanza and nowhere else.
     show.push(sec.lines.map((_, j) => j === 0));
+    meta.push(info);
   });
-  return { labels, show, script: view.script, lang: view.render_lang };
+  return { labels, show, meta, script: view.script, lang: view.render_lang };
+}
+
+/** Script and language for section i. A file named for one language may hold
+ *  sections in another, and those must not be drawn with the file's font. */
+export function scriptOf(view, i) {
+  const m = view.sectionMeta && view.sectionMeta[i];
+  return m ? { script: m.script, lang: m.render_lang }
+           : { script: view.script, lang: view.render_lang };
 }
 
 /** The label now lives in its own column, so take it off the lyric line. */
@@ -71,11 +80,12 @@ const el = (tag, cls, text) => {
   return n;
 };
 
-function lineNode(view, text) {
+function lineNode(view, text, i) {
   const p = el("p", "ln");
+  const { script, lang } = scriptOf(view, i);
   p.dataset.kind = view.kind;
-  p.dataset.script = view.script;
-  p.lang = view.render_lang;
+  p.dataset.script = script;
+  p.lang = lang;
   if (text == null) {
     p.classList.add("slot");        // deliberate empty slot ('~')
     p.textContent = " ";
@@ -132,7 +142,7 @@ function rubyNode(unit, i, j) {
   const read = unit.ruby.sections[i].lines[j];
   if (base == null || read == null) return null;
 
-  const script = unit.base.script;
+  const { script, lang } = scriptOf(unit.base, i);
   const charwise = script === "han" || script === "japanese";
   // Character alignment needs one reading per character, but romanizations
   // group syllables into words — Tâi-lô's tshù-lāi is two characters. So split
@@ -159,7 +169,7 @@ function rubyNode(unit, i, j) {
   p.dataset.kind = unit.base.kind;
   p.dataset.script = script;
   p.dataset.align = charwise ? "char" : "word";
-  p.lang = unit.base.render_lang;
+  p.lang = lang;
   let k = 0;
   for (const u of units) {
     if (!u.column) {
@@ -191,21 +201,22 @@ const lyricRef = (units) => units.find((u) => !u.attr);
 function appendUnitLine(parent, unit, i, j) {
   if (unit.attr) {
     const p = el("p", "ln speaker");
-    p.dataset.script = unit.attr.script;
-    p.lang = unit.attr.lang;
+    const m = unit.attr.meta && unit.attr.meta[i];
+    p.dataset.script = m ? m.script : unit.attr.script;
+    p.lang = m ? m.render_lang : unit.attr.lang;
     p.textContent = unit.attr.show[i][j] ? (unit.attr.labels[i][j] || "") : "";
     parent.appendChild(p);
     return;
   }
   if (unit.view) {
-    parent.appendChild(lineNode(unit.view, unit.view.sections[i].lines[j]));
+    parent.appendChild(lineNode(unit.view, unit.view.sections[i].lines[j], i));
     return;
   }
   const aligned = rubyNode(unit, i, j);
   if (aligned) { parent.appendChild(aligned); return; }
   // Counts disagree on this one line — show them stacked rather than mis-aligned.
-  parent.appendChild(lineNode(unit.base, unit.base.sections[i].lines[j]));
-  parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j]));
+  parent.appendChild(lineNode(unit.base, unit.base.sections[i].lines[j], i));
+  parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j], i));
 }
 
 /** Consecutive lines of section i sharing every attribution value. With both

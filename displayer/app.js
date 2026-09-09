@@ -300,13 +300,24 @@ async function renderSong(route) {
       }
       const attributions = [];
       if (speakers) attributions.push(speakers);
-      if (canShowLangs && showLangs) {
+      if (canShowLangs) {
+        const infoOf = (code) => {
+          const e = INDEX.languages[code] || {};
+          return { label: e.endonym || e.label || code,
+                   script: e.script || "latin",
+                   render_lang: e.render_lang || code };
+        };
         const base = views.find((v) => v.kind === "original") || views[0];
-        const label = (code) =>
-          (INDEX.languages[code] || {}).endonym || (INDEX.languages[code] || {}).label || code;
         const langAttr = sectionLanguages(base, song.section_languages,
-          song.original_languages[0], label);
-        if (langAttr) attributions.push(langAttr);
+          song.original_languages[0], infoOf);
+        if (langAttr) {
+          // A file named for one language can hold sections in another. The
+          // lines must carry their own section's script whether or not the
+          // column is on show, or a Russian stanza is drawn in a Han font.
+          views = views.map((v) =>
+            (v === base ? { ...v, sectionMeta: langAttr.meta } : v));
+          if (showLangs) attributions.push(langAttr);
+        }
       }
       drawChips();
       renderLyrics(lyrics, views, mode, attributions);
