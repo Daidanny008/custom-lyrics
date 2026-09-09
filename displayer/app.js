@@ -303,7 +303,8 @@ async function renderSong(route) {
       if (canShowLangs) {
         const infoOf = (code) => {
           const e = INDEX.languages[code] || {};
-          return { label: e.endonym || e.label || code,
+          return { code,
+                   label: e.endonym || e.label || code,
                    script: e.script || "latin",
                    render_lang: e.render_lang || code };
         };

@@ -102,7 +102,11 @@ function toUnits(views) {
   for (const v of views) {
     if (used.has(v)) continue;
     if (!v.variant) {
-      const r = views.find((o) => o !== v && !used.has(o) && o.lang === v.lang &&
+      // A bilingual file is named for one language but holds sections in
+      // another, so its romanization will not share the file's language code.
+      const covers = (code) => code === v.lang ||
+        Boolean(v.sectionMeta && v.sectionMeta.some((m) => m.code === code));
+      const r = views.find((o) => o !== v && !used.has(o) && covers(o.lang) &&
         (o.kind === "romanization" || o.kind === "phonetic"));
       if (r) { used.add(v); used.add(r); units.push({ base: v, ruby: r }); continue; }
     }
@@ -214,9 +218,13 @@ function appendUnitLine(parent, unit, i, j) {
   }
   const aligned = rubyNode(unit, i, j);
   if (aligned) { parent.appendChild(aligned); return; }
-  // Counts disagree on this one line — show them stacked rather than mis-aligned.
   parent.appendChild(lineNode(unit.base, unit.base.sections[i].lines[j], i));
-  parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j], i));
+  // A '~' reading means this line has no romanization at all — in a partly
+  // romanised song most lines do not. Stacking a blank under each would pad
+  // the whole song out.
+  if (unit.ruby.sections[i].lines[j] != null) {
+    parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j], i));
+  }
 }
 
 /** Consecutive lines of section i sharing every attribution value. With both
