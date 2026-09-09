@@ -1,8 +1,8 @@
 {
   "updated": "2026-09-08",
   "songs": 15,
-  "lyric_files": 33,
-  "lines": 1352,
+  "lyric_files": 34,
+  "lines": 1384,
   "original_languages": {
     "普通话": 4,
     "Русский": 3,
@@ -16,8 +16,8 @@
   "languages_present": {
     "普通话": 9,
     "English": 7,
+    "Русский": 3,
     "Latina": 2,
-    "Русский": 2,
     "Français": 2,
     "粤语": 2,
     "國語": 1,
@@ -28,7 +28,7 @@
   "versions_by_kind": {
     "original": 15,
     "translation": 13,
-    "romanization": 5
+    "romanization": 6
   },
   "tags": {
     "会唱的": 7,
