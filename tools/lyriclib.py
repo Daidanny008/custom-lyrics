@@ -121,14 +121,18 @@ def discover_files(folder: Path, meta: dict, langs: dict):
             kind = variants[variant].get("kind", "romanization")
             label = variants[variant]["label"]
 
+        # A romanization is Latin text whatever it romanises, so it must not
+        # inherit its source language's script — that would put Han spacing on
+        # jyutping, or a Cyrillic face on a transliteration.
+        romanised = kind in ("romanization", "phonetic")
         found.append({
             "file": p.name,
             "lang": lang,
             "variant": variant,
             "kind": kind,
             "label": labels.get(p.name, label),
-            "render_lang": entry.get("render_lang", lang),
-            "script": entry.get("script", "latin"),
+            "render_lang": f"{lang}-Latn" if romanised else entry.get("render_lang", lang),
+            "script": "latin" if romanised else entry.get("script", "latin"),
         })
 
     order = meta.get("order", [])
@@ -208,18 +212,35 @@ def check_section_languages(meta: dict, files: list, parsed: dict, langs: dict):
         problems.append("meta.json: section_languages needs at least two original_languages")
     ref = next((f["file"] for f in files if f["kind"] == "original"), None)
     total = len(parsed.get(ref, [])) if ref else 0
-    for key, lang in mapping.items():
+    sections = parsed.get(ref, []) if ref else []
+    for key, value in mapping.items():
         if not key.isdigit() or not 1 <= int(key) <= total:
             problems.append(
                 f"meta.json: section_languages has section '{key}', "
                 f"but the song has {total} sections")
-        if lang not in registry:
-            problems.append(f"meta.json: section_languages uses unknown language '{lang}'")
-        elif lang not in originals:
-            problems.append(
-                f"meta.json: section_languages uses '{lang}', "
-                f"which is not in original_languages")
+            continue
+        # A value is either one language for the whole section, or a
+        # line-number -> language map for a section that switches mid-stanza.
+        if isinstance(value, dict):
+            n_lines = len(sections[int(key) - 1]["lines"])
+            for line_key, lang in value.items():
+                if not line_key.isdigit() or not 1 <= int(line_key) <= n_lines:
+                    problems.append(
+                        f"meta.json: section_languages section {key} has line "
+                        f"'{line_key}', but that section has {n_lines} lines")
+                problems += _check_lang(lang, registry, originals)
+        else:
+            problems += _check_lang(value, registry, originals)
     return problems
+
+
+def _check_lang(lang, registry, originals):
+    if lang not in registry:
+        return [f"meta.json: section_languages uses unknown language '{lang}'"]
+    if lang not in originals:
+        return [f"meta.json: section_languages uses '{lang}', "
+                f"which is not in original_languages"]
+    return []
 
 
 def check_alignment(folder: Path, files: list):

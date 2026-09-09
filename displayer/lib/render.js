@@ -43,21 +43,30 @@ export function extractSpeakers(view) {
 export function sectionLanguages(view, mapping, fallback, infoOf) {
   if (!mapping) return null;
   const labels = [], show = [], meta = [];
+  let previous = null;
   view.sections.forEach((sec, i) => {
-    const info = infoOf(mapping[String(i + 1)] || fallback);
-    labels.push(sec.lines.map(() => info.label));
-    // The language is constant within a section, so it is named once at the
-    // top of each stanza and nowhere else.
-    show.push(sec.lines.map((_, j) => j === 0));
-    meta.push(info);
+    // A section is either one language, or a line-number -> language map for
+    // a stanza that switches partway through.
+    const entry = mapping[String(i + 1)];
+    const perLine = entry && typeof entry === "object";
+    const secLabels = [], secShow = [], secMeta = [];
+    sec.lines.forEach((_, j) => {
+      const info = infoOf(
+        (perLine ? entry[String(j + 1)] : entry) || fallback);
+      secLabels.push(info.label);
+      secMeta.push(info);
+      secShow.push(j === 0 || info.label !== previous);
+      previous = info.label;
+    });
+    labels.push(secLabels); show.push(secShow); meta.push(secMeta);
   });
   return { labels, show, meta, script: view.script, lang: view.render_lang };
 }
 
 /** Script and language for section i. A file named for one language may hold
  *  sections in another, and those must not be drawn with the file's font. */
-export function scriptOf(view, i) {
-  const m = view.sectionMeta && view.sectionMeta[i];
+export function scriptOf(view, i, j) {
+  const m = view.sectionMeta && view.sectionMeta[i] && view.sectionMeta[i][j];
   return m ? { script: m.script, lang: m.render_lang }
            : { script: view.script, lang: view.render_lang };
 }
@@ -80,9 +89,9 @@ const el = (tag, cls, text) => {
   return n;
 };
 
-function lineNode(view, text, i) {
+function lineNode(view, text, i, j) {
   const p = el("p", "ln");
-  const { script, lang } = scriptOf(view, i);
+  const { script, lang } = scriptOf(view, i, j);
   p.dataset.kind = view.kind;
   p.dataset.script = script;
   p.lang = lang;
@@ -105,7 +114,7 @@ function toUnits(views) {
       // A bilingual file is named for one language but holds sections in
       // another, so its romanization will not share the file's language code.
       const covers = (code) => code === v.lang ||
-        Boolean(v.sectionMeta && v.sectionMeta.some((m) => m.code === code));
+        Boolean(v.sectionMeta && v.sectionMeta.some((sec) => sec.some((m) => m.code === code)));
       const r = views.find((o) => o !== v && !used.has(o) && covers(o.lang) &&
         (o.kind === "romanization" || o.kind === "phonetic"));
       if (r) { used.add(v); used.add(r); units.push({ base: v, ruby: r }); continue; }
@@ -146,7 +155,7 @@ function rubyNode(unit, i, j) {
   const read = unit.ruby.sections[i].lines[j];
   if (base == null || read == null) return null;
 
-  const { script, lang } = scriptOf(unit.base, i);
+  const { script, lang } = scriptOf(unit.base, i, j);
   const charwise = script === "han" || script === "japanese";
   // Character alignment needs one reading per character, but romanizations
   // group syllables into words — Tâi-lô's tshù-lāi is two characters. So split
@@ -205,7 +214,7 @@ const lyricRef = (units) => units.find((u) => !u.attr);
 function appendUnitLine(parent, unit, i, j) {
   if (unit.attr) {
     const p = el("p", "ln speaker");
-    const m = unit.attr.meta && unit.attr.meta[i];
+    const m = unit.attr.meta && unit.attr.meta[i] && unit.attr.meta[i][j];
     p.dataset.script = m ? m.script : unit.attr.script;
     p.lang = m ? m.render_lang : unit.attr.lang;
     p.textContent = unit.attr.show[i][j] ? (unit.attr.labels[i][j] || "") : "";
@@ -213,17 +222,17 @@ function appendUnitLine(parent, unit, i, j) {
     return;
   }
   if (unit.view) {
-    parent.appendChild(lineNode(unit.view, unit.view.sections[i].lines[j], i));
+    parent.appendChild(lineNode(unit.view, unit.view.sections[i].lines[j], i, j));
     return;
   }
   const aligned = rubyNode(unit, i, j);
   if (aligned) { parent.appendChild(aligned); return; }
-  parent.appendChild(lineNode(unit.base, unit.base.sections[i].lines[j], i));
+  parent.appendChild(lineNode(unit.base, unit.base.sections[i].lines[j], i, j));
   // A '~' reading means this line has no romanization at all — in a partly
   // romanised song most lines do not. Stacking a blank under each would pad
   // the whole song out.
   if (unit.ruby.sections[i].lines[j] != null) {
-    parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j], i));
+    parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j], i, j));
   }
 }
 
