@@ -214,7 +214,10 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
    margin on top of that pulls the original text visibly apart. Keep it to
    about one space so the base line still reads as ordinary prose. */
 .ruby-line[data-align="word"] ruby { margin: 0 .3em .45em 0; }
-.ruby-line[data-align="word"] rt { font-size: 1em; }
+/* Inherit the base's face rather than --font-roman. That stack exists for the
+   stacked diacritics of POJ and Tâi-lô, and for a Cyrillic base it resolves to
+   a UI sans sitting under a serif — two different families in one column. */
+.ruby-line[data-align="word"] rt { font-size: 1em; font-family: inherit; }
 .ruby-line rt {
   display: block;
   font-family: var(--font-roman);
