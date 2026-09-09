@@ -178,10 +178,13 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 
 .ln[data-kind="original"]     { color: var(--fg); font-weight: 500; }
 .ln[data-kind="translation"]  { color: var(--fg-dim); }
+/* Body size like every other line — a romanization must not change size
+   depending on whether it aligned or fell back to stacking. Colour, not
+   scale, is what marks it as the reading. */
 .ln[data-kind="romanization"],
 .ln[data-kind="phonetic"] {
   font-family: var(--font-roman);
-  font-size: calc(.86rem * var(--scale));
+  font-size: calc(1.02rem * var(--scale));
   color: var(--fg-faint);
   letter-spacing: .012em;
   line-height: 1.45;
@@ -193,8 +196,11 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
    Each character is its own column: the character on top, its syllable below,
    both flush left, with a gap so columns never run together. ruby-align has
    poor support, so the stacking is done with plain block boxes instead. */
+/* Same body size as every other lyric line — an aligned column sitting beside
+   a plain translation must not be visibly larger than it. The reading takes a
+   bigger share of that size instead of the base being inflated to carry it. */
 .ruby-line {
-  font-size: calc(1.25rem * var(--scale));
+  font-size: calc(1.02rem * var(--scale));
   line-height: 1.35;
   padding-left: 0;
   text-indent: 0;
@@ -221,7 +227,7 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 .ruby-line rt {
   display: block;
   font-family: var(--font-roman);
-  font-size: .46em;
+  font-size: .58em;
   font-weight: 400;
   line-height: 1.3;
   color: var(--fg-dim);
