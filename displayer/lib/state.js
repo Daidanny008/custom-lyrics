@@ -17,28 +17,31 @@ export function readRoute() {
       id: decodeURIComponent(m[1]),
       selected: query.get("v") ? query.get("v").split(",").filter(Boolean) : null,
       mode: query.get("mode") || "columns",
-      who: query.get("who"),   // null = default (on), "0" = explicitly off
+      who: query.get("who"),     // null = default (on), "0" = explicitly off
+      langs: query.get("lg"),    // same, for the language column
     };
   }
   const list = (k) => (query.get(k) ? query.get(k).split(",").filter(Boolean) : []);
   return { view: "library", q: query.get("q") || "", tags: list("tags"), langs: list("langs") };
 }
 
-export function goSong(id, selected, mode, who) {
+export function goSong(id, selected, mode, who, langs) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
   if (mode && mode !== "columns") q.set("mode", mode);
   if (who === false) q.set("who", "0");
+  if (langs === false) q.set("lg", "0");
   const qs = q.toString();
   location.hash = `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`;
 }
 
 /** Replace the hash without pushing a history entry - for chip toggles. */
-export function replaceSong(id, selected, mode, who) {
+export function replaceSong(id, selected, mode, who, langs) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
   if (mode && mode !== "columns") q.set("mode", mode);
   if (who === false) q.set("who", "0");
+  if (langs === false) q.set("lg", "0");
   const qs = q.toString();
   history.replaceState(null, "", `#/song/${encodeURIComponent(id)}${qs ? "?" + qs : ""}`);
 }

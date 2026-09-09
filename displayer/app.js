@@ -1,6 +1,6 @@
 import { parseSections } from "./lib/parse.js";
-import { renderLyrics, resolveMode, DEFAULT_MODE, extractSpeakers, stripSpeakers }
-  from "./lib/render.js";
+import { renderLyrics, resolveMode, DEFAULT_MODE, extractSpeakers, stripSpeakers,
+         sectionLanguages } from "./lib/render.js";
 import { filterSongs, songRow, presentFacets, artistLine, bylineFor } from "./lib/library.js";
 import * as S from "./lib/state.js";
 
@@ -174,7 +174,9 @@ async function renderSong(route) {
   let mode = route.mode || DEFAULT_MODE;
   let who = route.who !== "0";   // on by default where attribution exists
   // Only known once the original has been fetched and inspected, in draw().
-  let canAttribute = false;
+  let canAttribute = false;      // singer column available?
+  let canShowLangs = Boolean(song.section_languages);
+  let showLangs = route.langs !== "0";
 
   songCtx = { song, get selected() { return selected; }, toggle };
   document.addEventListener("keydown", songKeys);
@@ -182,6 +184,7 @@ async function renderSong(route) {
   const chips = document.getElementById("chips");
   const modeBtn = document.getElementById("mode");
   const whoBtn = document.getElementById("who");
+  const langBtn = document.getElementById("langs");
 
   function drawChips() {
     chips.textContent = "";
@@ -203,13 +206,24 @@ async function renderSong(route) {
     whoBtn.textContent = who ? "singers ✓" : "singers";
     whoBtn.classList.toggle("on", who);
     whoBtn.title = "Show who sings each line in its own column";
+    langBtn.hidden = !canShowLangs;
+    langBtn.textContent = showLangs ? "languages ✓" : "languages";
+    langBtn.classList.toggle("on", showLangs);
+    langBtn.title = "Show which language each section is sung in";
   }
 
   // Only a collaboration can have anything to attribute, and only if the
   // original actually carries "name：" labels.
   whoBtn.addEventListener("click", () => {
     who = !who;
-    S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
+    writeState();
+    drawChips();
+    draw();
+  });
+
+  langBtn.addEventListener("click", () => {
+    showLangs = !showLangs;
+    writeState();
     drawChips();
     draw();
   });
@@ -217,10 +231,13 @@ async function renderSong(route) {
   modeBtn.addEventListener("click", () => {
     const order = Object.keys(MODE_LABELS);
     mode = order[(order.indexOf(resolveMode(mode)) + 1) % order.length];
-    S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
+    writeState();
     drawChips();
     draw();
   });
+
+  const writeState = () => S.replaceSong(song.id, selected, mode,
+    canAttribute ? who : null, canShowLangs ? showLangs : null);
 
   function toggle(key) {
     // Keep chip order stable regardless of click order.
@@ -228,7 +245,7 @@ async function renderSong(route) {
     next.has(key) ? next.delete(key) : next.add(key);
     selected = song.files.map(keyOf).filter((k) => next.has(k));
     S.remember(song.id, selected);
-    S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
+    writeState();
     drawChips();
     draw();
   }
@@ -265,8 +282,18 @@ async function renderSong(route) {
       } else {
         canAttribute = false;
       }
+      const attributions = [];
+      if (speakers) attributions.push(speakers);
+      if (canShowLangs && showLangs) {
+        const base = views.find((v) => v.kind === "original") || views[0];
+        const label = (code) =>
+          (INDEX.languages[code] || {}).endonym || (INDEX.languages[code] || {}).label || code;
+        const langAttr = sectionLanguages(base, song.section_languages,
+          song.original_languages[0], label);
+        if (langAttr) attributions.push(langAttr);
+      }
       drawChips();
-      renderLyrics(lyrics, views, mode, speakers);
+      renderLyrics(lyrics, views, mode, attributions);
     } catch (err) {
       lyrics.textContent = "";
       lyrics.appendChild(el("div", "fatal", `Could not load a lyric file — ${err.message}`));
@@ -277,7 +304,7 @@ async function renderSong(route) {
   // Must follow draw(): canAttribute is unknown until the original is parsed,
   // and writing the URL before then drops a shared ?who=0.
   await draw();
-  S.replaceSong(song.id, selected, mode, canAttribute ? who : null);
+  writeState();
 }
 
 function songKeys(e) {

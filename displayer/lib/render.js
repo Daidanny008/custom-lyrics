@@ -37,6 +37,22 @@ export function extractSpeakers(view) {
   return found ? { labels, show, script: view.script, lang: view.render_lang } : null;
 }
 
+/** Per-line language labels from a 1-based section -> language map. A song
+ *  that switches language mid-text has one file, so the column has to come
+ *  from metadata rather than from anything marked up in the text. */
+export function sectionLanguages(view, mapping, fallback, labelOf) {
+  if (!mapping) return null;
+  const labels = [], show = [];
+  view.sections.forEach((sec, i) => {
+    const label = labelOf(mapping[String(i + 1)] || fallback);
+    labels.push(sec.lines.map(() => label));
+    // The language is constant within a section, so it is named once at the
+    // top of each stanza and nowhere else.
+    show.push(sec.lines.map((_, j) => j === 0));
+  });
+  return { labels, show, script: view.script, lang: view.render_lang };
+}
+
 /** The label now lives in its own column, so take it off the lyric line. */
 export function stripSpeakers(view) {
   return {
@@ -166,18 +182,18 @@ function rubyNode(unit, i, j) {
 /** How many lines a unit holds in section i. The attribution unit carries no
  *  view of its own, so it reports the shape it was built from. */
 const unitLines = (unit, i) =>
-  unit.speakers ? unit.speakers.labels[i].length
+  unit.attr ? unit.attr.labels[i].length
                 : (unit.view || unit.base).sections[i].lines.length;
 
 /** The first real lyric unit — never the attribution column. */
-const lyricRef = (units) => units.find((u) => !u.speakers);
+const lyricRef = (units) => units.find((u) => !u.attr);
 
 function appendUnitLine(parent, unit, i, j) {
-  if (unit.speakers) {
+  if (unit.attr) {
     const p = el("p", "ln speaker");
-    p.dataset.script = unit.speakers.script;
-    p.lang = unit.speakers.lang;
-    p.textContent = unit.speakers.show[i][j] ? (unit.speakers.labels[i][j] || "") : "";
+    p.dataset.script = unit.attr.script;
+    p.lang = unit.attr.lang;
+    p.textContent = unit.attr.show[i][j] ? (unit.attr.labels[i][j] || "") : "";
     parent.appendChild(p);
     return;
   }
@@ -192,15 +208,17 @@ function appendUnitLine(parent, unit, i, j) {
   parent.appendChild(lineNode(unit.ruby, unit.ruby.sections[i].lines[j]));
 }
 
-/** Consecutive lines of section i sung by the same person. */
-function speakerRuns(speakers, i) {
-  const labels = speakers.labels[i];
+/** Consecutive lines of section i sharing every attribution value. With both
+ *  a singer and a language column, a run ends when either changes. */
+function attributionRuns(attrs, i, lineCount) {
   const runs = [];
-  labels.forEach((label, j) => {
+  for (let j = 0; j < lineCount; j++) {
+    const key = attrs.map((a) => a.labels[i][j] || "").join("\u0000");
     const last = runs[runs.length - 1];
-    if (last && last.label === label) last.end = j + 1;
-    else runs.push({ label, start: j, end: j + 1 });
-  });
+    if (last && last.key === key) last.end = j + 1;
+    else runs.push({ key, label: attrs.map((a) => a.labels[i][j]).filter(Boolean).join(" · "),
+                     start: j, end: j + 1 });
+  }
   return runs;
 }
 
@@ -208,13 +226,15 @@ function speakerRuns(speakers, i) {
  *  section is first cut into runs by singer and each run named — a column of
  *  names beside a block says nothing about which line belongs to whom. */
 function renderBySection(root, units, sectionCount) {
-  const attribution = units.find((u) => u.speakers);
-  const lyric = units.filter((u) => !u.speakers);
+  const attrs = units.filter((u) => u.attr).map((u) => u.attr);
+  const lyric = units.filter((u) => !u.attr);
+  const attribution = attrs.length > 0;
   for (let i = 0; i < sectionCount; i++) {
     const sec = el("section", "sec");
+    const n = unitLines(lyricRef(units), i);
     const runs = attribution
-      ? speakerRuns(attribution.speakers, i)
-      : [{ label: null, start: 0, end: unitLines(lyricRef(units), i) }];
+      ? attributionRuns(attrs, i, n)
+      : [{ label: null, start: 0, end: n }];
     for (const run of runs) {
       const wrap = attribution ? el("div", "run") : sec;
       if (attribution) wrap.appendChild(el("div", "run-who", run.label || ""));
@@ -253,14 +273,17 @@ function renderByColumns(root, units, sectionCount) {
   for (let i = 0; i < sectionCount; i++) {
     const sec = el("section", "sec");
     const grid = el("div", "cols");
-    const lyricCols = units.filter((u) => !u.speakers).length;
-    grid.style.setProperty("--cols", String(lyricCols));
-    if (units.some((u) => u.speakers)) grid.dataset.who = "";
+    const attrCols = units.filter((u) => u.attr).length;
+    grid.style.setProperty("--cols", String(units.length - attrCols));
+    if (attrCols) {
+      grid.style.setProperty("--who-n", String(attrCols));
+      grid.dataset.who = "";
+    }
     const n = unitLines(lyricRef(units), i);
     for (let j = 0; j < n; j++) {
       for (const unit of units) {
         const cell = el("div", "cell");
-        if (!unit.speakers) cell.dataset.kind = (unit.view || unit.base).kind;
+        if (!unit.attr) cell.dataset.kind = (unit.view || unit.base).kind;
         appendUnitLine(cell, unit, i, j);
         grid.appendChild(cell);
       }
@@ -278,25 +301,25 @@ export function resolveMode(mode) {
   return mode in MODES ? mode : DEFAULT_MODE;
 }
 
-export function renderLyrics(root, views, mode, speakers) {
+export function renderLyrics(root, views, mode, attributions = []) {
   root.textContent = "";
   if (!views.length) {
     root.appendChild(el("p", "empty-note", "No versions selected — pick one above."));
     return;
   }
   const units = toUnits(views);
-  if (speakers) units.unshift({ speakers });
+  for (const attr of [...attributions].reverse()) units.unshift({ attr });
   const sectionCount = views[0].sections.length;
   const resolved = resolveMode(mode);
   root.dataset.mode = resolved;
-  root.dataset.versions = units.filter((u) => !u.speakers).length;  // ruby pair counts as one
+  root.dataset.versions = units.filter((u) => !u.attr).length;  // ruby pair counts as one
   MODES[resolved](root, units, sectionCount);
 
   // Each stanza is its own grid, so a max-content attribution track sizes to
   // that stanza's widest name — a two-character singer pushes only its own
   // stanza's lyrics right. Measure the widest across the whole song and pin
   // every track to it so the lyric columns line up down the page.
-  if (speakers && resolved === "columns") {
+  if (attributions.length && resolved === "columns") {
     let widest = 0;
     for (const grid of root.querySelectorAll(".cols[data-who]")) {
       widest = Math.max(widest, grid.children[0].getBoundingClientRect().width);

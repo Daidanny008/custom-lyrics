@@ -88,6 +88,16 @@
       "type": "string",
       "maxLength": 3,
       "description": "How to join multiple artists. Default ' · ' means they performed together; ' / ' means separate recordings."
+    },
+    "section_languages": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[1-9][0-9]*$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "For a song that switches language mid-text: 1-based section number -> language code. Unlisted sections take the first original language."
     }
   }
 }

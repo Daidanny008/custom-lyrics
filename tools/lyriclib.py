@@ -194,6 +194,34 @@ def check_stray_labels(folder: Path, files: list, parsed: dict):
     return problems
 
 
+def check_section_languages(meta: dict, files: list, parsed: dict, langs: dict):
+    """section_languages names which sections switch language, so its keys must
+    be real section numbers and its values registered languages the song
+    actually claims to be in."""
+    mapping = meta.get("section_languages")
+    if not mapping:
+        return []
+    problems = []
+    registry = langs["languages"]
+    originals = meta.get("original_languages", [])
+    if len(originals) < 2:
+        problems.append("meta.json: section_languages needs at least two original_languages")
+    ref = next((f["file"] for f in files if f["kind"] == "original"), None)
+    total = len(parsed.get(ref, [])) if ref else 0
+    for key, lang in mapping.items():
+        if not key.isdigit() or not 1 <= int(key) <= total:
+            problems.append(
+                f"meta.json: section_languages has section '{key}', "
+                f"but the song has {total} sections")
+        if lang not in registry:
+            problems.append(f"meta.json: section_languages uses unknown language '{lang}'")
+        elif lang not in originals:
+            problems.append(
+                f"meta.json: section_languages uses '{lang}', "
+                f"which is not in original_languages")
+    return problems
+
+
 def check_alignment(folder: Path, files: list):
     """The alignment contract. Returns (problems, parsed_by_filename)."""
     problems, parsed = [], {}
@@ -259,6 +287,7 @@ def scan(lyrics_dir: Path = LYRICS):
         align, parsed = check_alignment(folder, files)
         song.problems += align
         song.problems += check_stray_labels(folder, files, parsed)
+        song.problems += check_section_languages(meta, files, parsed, langs)
         songs.append(song)
     return songs, langs, globals_
 
@@ -307,6 +336,7 @@ def to_index_entry(song: Song, langs: dict):
         "display_title": display_title(song),
         "artist": song.meta.get("artist", []),
         "artist_separator": song.meta.get("artist_separator"),
+        "section_languages": song.meta.get("section_languages"),
         "album": song.meta.get("album"),
         "year": song.meta.get("year"),
         "original_languages": song.meta.get("original_languages", []),

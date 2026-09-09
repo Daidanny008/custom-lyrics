@@ -245,7 +245,9 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 .cols[data-who] {
   /* --who-w is measured after the first paint; max-content is the fallback
      for that one frame. */
-  grid-template-columns: var(--who-w, max-content) repeat(var(--cols, 1), minmax(0, 1fr));
+  grid-template-columns:
+    repeat(var(--who-n, 1), var(--who-w, max-content))
+    repeat(var(--cols, 1), minmax(0, 1fr));
 }
 /* Same size, colour and line-height as the lyric it names, so it sits on the
    line rather than floating above it. */
