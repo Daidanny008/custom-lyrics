@@ -186,19 +186,35 @@ async function renderSong(route) {
   const whoBtn = document.getElementById("who");
   const langBtn = document.getElementById("langs");
 
+  /** Usually one chip per file. A file that is bilingual within itself gets a
+   *  chip per language, all bound to that one file — picking either picks the
+   *  same text, so they share a number and toggle together. */
+  function chipsFor(f) {
+    const map = song.section_languages;
+    if (f.kind !== "original" || !map) return [f.label];
+    const present = new Set([song.original_languages[0], ...Object.values(map)]);
+    const labels = song.original_languages
+      .filter((code) => present.has(code))
+      .map((code) => (INDEX.languages[code] || {}).endonym
+                  || (INDEX.languages[code] || {}).label || code);
+    return labels.length > 1 ? labels : [f.label];
+  }
+
   function drawChips() {
     chips.textContent = "";
     song.files.forEach((f, i) => {
       const key = keyOf(f);
-      const b = el("button", "chip");
-      b.type = "button";
-      b.dataset.kind = f.kind;
-      b.setAttribute("aria-pressed", String(selected.includes(key)));
-      if (selected.includes(key)) b.classList.add("on");
-      b.appendChild(el("span", "chip-label", f.label));
-      if (i < 9) b.appendChild(el("span", "chip-key", String(i + 1)));
-      b.addEventListener("click", () => toggle(key));
-      chips.appendChild(b);
+      for (const label of chipsFor(f)) {
+        const b = el("button", "chip");
+        b.type = "button";
+        b.dataset.kind = f.kind;
+        b.setAttribute("aria-pressed", String(selected.includes(key)));
+        if (selected.includes(key)) b.classList.add("on");
+        b.appendChild(el("span", "chip-label", label));
+        if (i < 9) b.appendChild(el("span", "chip-key", String(i + 1)));
+        b.addEventListener("click", () => toggle(key));
+        chips.appendChild(b);
+      }
     });
     modeBtn.textContent = MODE_LABELS[resolveMode(mode)];
     modeBtn.title = "Cycle: by column → by line → by section";
