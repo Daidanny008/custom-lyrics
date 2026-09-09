@@ -210,7 +210,10 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
    the shrunken reading that Han characters do — the word and its romanization
    sit at the same size, one above the other. */
 .ruby-line[data-align="word"] { font-size: calc(1.02rem * var(--scale)); line-height: 1.4; }
-.ruby-line[data-align="word"] ruby { margin: 0 .6em .5em 0; }
+/* Word columns already sit as far apart as their readings demand; a wide
+   margin on top of that pulls the original text visibly apart. Keep it to
+   about one space so the base line still reads as ordinary prose. */
+.ruby-line[data-align="word"] ruby { margin: 0 .3em .45em 0; }
 .ruby-line[data-align="word"] rt { font-size: 1em; }
 .ruby-line rt {
   display: block;
