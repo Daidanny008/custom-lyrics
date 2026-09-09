@@ -237,14 +237,9 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
 
 /* section mode with attribution: each stanza is cut into runs by singer */
 .run + .run { margin-top: .9rem; }
-.run-who {
-  margin-bottom: .15rem;
-  color: var(--fg);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: .22em;
-  text-decoration-thickness: from-font;
-}
+/* Only the spacing differs from the attribution column — everything else
+   comes from .ln.speaker so a name looks identical in every mode. */
+.run-who { margin-bottom: .15rem; }
 
 /* section mode: whole block per version */
 .block + .block { margin-top: .55rem; }

@@ -265,7 +265,18 @@ function renderBySection(root, units, sectionCount) {
       : [{ label: null, start: 0, end: n }];
     for (const run of runs) {
       const wrap = attribution ? el("div", "run") : sec;
-      if (attribution) wrap.appendChild(el("div", "run-who", run.label || ""));
+      if (attribution) {
+        // Same element treatment as the attribution column, so a name reads
+        // the same whichever mode it is shown in.
+        const who = el("div", "ln speaker run-who", run.label || "");
+        // Only the language attribution carries per-line meta; a singer column
+        // has one script for the whole song. Fall back to it, as the column
+        // renderer does, or the name loses its face entirely.
+        const m = attrs[0].meta && attrs[0].meta[i] && attrs[0].meta[i][run.start];
+        who.dataset.script = m ? m.script : attrs[0].script;
+        who.lang = m ? m.render_lang : attrs[0].lang;
+        wrap.appendChild(who);
+      }
       lyric.forEach((unit, ui) => {
         const block = el("div", "block");
         block.dataset.kind = (unit.view || unit.base).kind;
