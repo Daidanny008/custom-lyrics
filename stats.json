@@ -1,8 +1,8 @@
 {
   "updated": "2026-09-11",
   "songs": 26,
-  "lyric_files": 56,
-  "lines": 2309,
+  "lyric_files": 57,
+  "lines": 2363,
   "original_languages": {
     "Français": 13,
     "普通话": 4,
@@ -14,20 +14,20 @@
     "Español": 1
   },
   "languages_present": {
-    "English": 16,
+    "English": 17,
     "Français": 13,
     "普通话": 11,
     "Русский": 3,
     "Latina": 2,
     "粤语": 2,
-    "國語": 1,
     "闽南语": 1,
+    "國語": 1,
     "Italiano": 1,
     "Español": 1
   },
   "versions_by_kind": {
     "original": 26,
-    "translation": 24,
+    "translation": 25,
     "romanization": 6
   },
   "tags": {
