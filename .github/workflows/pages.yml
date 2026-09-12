@@ -43,6 +43,10 @@ jobs:
       - name: Build the demo site
         run: python3 tools/build_site.py
       - uses: actions/configure-pages@v5
+        with:
+          # Turns Pages on for the repo the first time this runs, so the
+          # workflow is the whole setup rather than half of it.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
