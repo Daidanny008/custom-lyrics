@@ -1,0 +1,19 @@
+{
+  "id": "gimn-sssr",
+  "title": {
+    "ru": "Государственный гимн СССР",
+    "en": "State Anthem of the USSR",
+    "cmn-Hans": "苏联国歌"
+  },
+  "year": 1977,
+  "original_languages": [
+    "ru"
+  ],
+  "tags": [],
+  "order": [
+    "ru.txt",
+    "en.txt",
+    "cmn-Hans.txt"
+  ],
+  "notes": "The 1977 revision, in force 1 September 1977 to 26 December 1991. Words С. В. Михалков and Г. Эль-Регистан, music А. В. Александров.\nIncluded here on the reading that Article 1259 of the Russian Civil Code excludes state symbols from copyright, and that the Russian Federation as successor state carries that exemption to the Soviet anthem - the melody being the same one the Russian anthem uses today. Worth knowing what this rests on: Михалков died in 2009, so on the ordinary life-plus-70 rule the text would run to 2079, and the state-symbol argument is what displaces that.\nThe 1944 original differs - its refrains vary between verses and the third line of verse two read \"Нас вырастил Сталин\". Russian transcribed from the text of the 1977 decree.\nBoth translations were written for this archive, so no third-party translator's rights attach to them."
+}
