@@ -5,6 +5,7 @@
 const LS_PREFIX = "custom-lyrics:sel:";
 const LS_THEME = "custom-lyrics:theme";
 const LS_SCALE = "custom-lyrics:scale";
+const LS_LIBRARY = "custom-lyrics:library";
 
 export function readRoute() {
   const hash = location.hash.replace(/^#/, "") || "/";
@@ -57,8 +58,17 @@ export function libraryHash(q, tags, langs) {
   return `#/${qs ? "?" + qs : ""}`;
 }
 
-export function goLibrary(q, tags, langs) {
-  location.hash = libraryHash(q, tags, langs);
+/** The filtered library we last looked at. Leaving a song returns to it, so
+ *  clicking into a song and back out does not quietly clear your filters.
+ *  Stored rather than held in memory, so reloading on a song page keeps it. */
+export function rememberLibrary(hash) {
+  try { localStorage.setItem(LS_LIBRARY, hash); } catch { /* storage can be denied */ }
+}
+
+export function goLibrary() {
+  let hash = "#/";
+  try { hash = localStorage.getItem(LS_LIBRARY) || "#/"; } catch { /* same */ }
+  location.hash = hash;
 }
 
 export const remember = (id, sel) => localStorage.setItem(LS_PREFIX + id, sel.join(","));

@@ -119,7 +119,9 @@ function renderLibrary(route) {
         INDEX.songs.length ? "Nothing matches those filters." : "No songs indexed yet — run ./run.sh"));
     }
     count.textContent = `${matched.length} of ${INDEX.songs.length}`;
-    history.replaceState(null, "", S.libraryHash(query, tags, langs));
+    const hash = S.libraryHash(query, tags, langs);
+    history.replaceState(null, "", hash);
+    S.rememberLibrary(hash);
   }
 
   function open(id) { S.goSong(id, S.recall(id) || undefined); }
