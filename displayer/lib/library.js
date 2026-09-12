@@ -8,7 +8,8 @@ const el = (tag, cls, text) => {
 };
 
 export function filterSongs(songs, query, tags, langs) {
-  const q = query.trim().toLowerCase();
+  // Folded to match search_blob(), which writes ё as е - see the note there.
+  const q = query.trim().toLowerCase().replace(/ё/g, "е");
   return songs.filter((s) => {
     if (q && !s.search.includes(q)) return false;
     if (tags.length && !tags.every((t) => s.tags.includes(t))) return false;

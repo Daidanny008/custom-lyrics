@@ -343,7 +343,10 @@ def search_blob(song: Song, langs: dict):
     for f in song.files:
         entry = langs["languages"][f["lang"]]
         parts += [entry["label"], entry.get("endonym", ""), f["label"]]
-    return " ".join(p for p in parts if p).lower()
+    # ё folds to е: Russian is routinely typed without it, and a title spelled
+    # correctly should still be findable by someone who reaches for the plain
+    # key. filterSongs() folds the query the same way, so both spellings match.
+    return " ".join(p for p in parts if p).lower().replace("ё", "е")
 
 
 def display_title(song: Song):
