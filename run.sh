@@ -8,7 +8,7 @@ PORT="${PORT:-8080}"
 if [ ! -e lyrics/README.md ] && [ -z "$(ls -A lyrics 2>/dev/null || true)" ]; then
   echo "lyrics/ is empty — the data submodule isn't checked out."
   echo "  git submodule update --init"
-  exit 1
+  echo "Continuing with demo/ alone; the library will show only the public songs."
 fi
 
 python3 tools/validate.py || echo "  (continuing; broken songs will be skipped)"

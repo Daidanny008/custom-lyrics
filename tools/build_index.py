@@ -5,9 +5,12 @@ A static server cannot list directories, so this manifest is the only way the
 browser learns which songs and language files exist. Broken songs are skipped
 rather than fatal, so one bad file never blanks the library.
 
-Defaults index lyrics/ for local use; build_site.py points it at demo/ instead,
-which is why the corpus directory, the output path and the URL the browser
-fetches lyric files from are all arguments rather than constants.
+Defaults to the local pair (lyrics/ + demo/); build_site.py points it at demo/
+alone, which is why the corpus directories, the output path and the URL the
+browser fetches lyric files from are all arguments rather than constants.
+
+Without --corpus-url each song is pointed at ../<its own corpus dir>, which is
+what lets one index serve songs from both.
 """
 import argparse
 import json
@@ -19,17 +22,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import lyriclib  # noqa: E402
 
 OUT = lyriclib.ROOT / "displayer" / "data" / "index.json"
-CORPUS_URL = "../lyrics"   # where the browser finds <song>/<file>.txt, from the app
+# Where the browser finds <song>/<file>.txt, relative to the app. Left unset,
+# each song gets ../<its corpus dir>; the demo site overrides it, having
+# flattened one corpus to a single directory beside index.html.
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--lyrics", type=Path, default=lyriclib.LYRICS,
-                    help="corpus to scan (default: lyrics/)")
+    ap.add_argument("--lyrics", type=Path, nargs="+", default=list(lyriclib.CORPORA),
+                    help="corpora to scan (default: lyrics/ and demo/)")
     ap.add_argument("--out", type=Path, default=OUT,
                     help="where to write index.json")
-    ap.add_argument("--corpus-url", default=CORPUS_URL,
-                    help="path the browser fetches lyric files from, relative to the app")
+    ap.add_argument("--corpus-url", default=None,
+                    help="override the per-song lyric path, for a flattened build")
     ap.add_argument("--notice", default=None,
                     help="a line shown above the library, e.g. to explain a demo build")
     args = ap.parse_args()
@@ -50,7 +55,7 @@ def main():
         "notice": args.notice,
         "languages": langs["languages"],
         "tags": json.loads((lyriclib.REGISTRY / "tags.json").read_text("utf-8"))["tags"],
-        "songs": [lyriclib.to_index_entry(s, langs) for s in good],
+        "songs": [lyriclib.to_index_entry(s, langs, args.corpus_url) for s in good],
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", "utf-8")

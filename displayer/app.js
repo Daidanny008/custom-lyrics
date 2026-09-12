@@ -274,7 +274,7 @@ async function renderSong(route) {
   }
 
   async function loadFile(f) {
-    const url = `${INDEX.corpus || "../lyrics"}/${song.id}/${f.file}`;
+    const url = `${song.corpus || INDEX.corpus || "../lyrics"}/${song.id}/${f.file}`;
     if (!lyricCache.has(url)) {
       const res = await fetch(url, { cache: "no-cache" });
       if (!res.ok) throw new Error(`${f.file}: ${res.status}`);

@@ -14,6 +14,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "tools" / "registry"
 LYRICS = ROOT / "lyrics"
+DEMO = ROOT / "demo"
+# The local library is the union of the two: lyrics/ is the private archive,
+# demo/ holds what is cleared for the public site. A song lives in exactly one
+# of them, so promoting one to public is a move, not a copy that can drift.
+CORPORA = (LYRICS, DEMO)
 
 SECTION_LABEL_RE = re.compile(r"^\[([^\]]+)\]$")
 TIMESTAMP_RE = re.compile(r"^\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]\s*")
@@ -282,15 +287,29 @@ def check_alignment(folder: Path, files: list):
 
 # --------------------------------------------------------------------------- scan
 
-def scan(lyrics_dir: Path = LYRICS):
+def scan(dirs=CORPORA):
+    """Scan one corpus directory or several. Songs are keyed by folder name, so
+    the same id appearing in two corpora is an error rather than a silent win."""
+    if isinstance(dirs, (str, Path)):
+        dirs = [Path(dirs)]
+    dirs = [Path(d) for d in dirs]
     langs, _tags, allowed_tags = load_registry()
     songs = []
-    if not lyrics_dir.exists():
-        return songs, langs, [f"{lyrics_dir} does not exist"]
+    present = [d for d in dirs if d.exists()]
+    if not present:
+        return songs, langs, [f"{', '.join(str(d) for d in dirs)} does not exist"]
     globals_ = []
-    for folder in sorted(p for p in lyrics_dir.iterdir() if p.is_dir()):
+    seen = {}
+    folders = sorted((f for d in present for f in d.iterdir() if f.is_dir()),
+                     key=lambda f: f.name)
+    for folder in folders:
         if folder.name.startswith((".", "_")):
             continue
+        if folder.name in seen:
+            globals_.append(f"{folder.name}/: in both {seen[folder.name]} and "
+                            f"{folder.parent.name} - a song belongs to one corpus")
+            continue
+        seen[folder.name] = folder.parent.name
         meta_path = folder / "meta.json"
         if not meta_path.exists():
             globals_.append(f"{folder.name}/: no meta.json")
@@ -350,9 +369,10 @@ def song_languages(song: Song):
     return ordered
 
 
-def to_index_entry(song: Song, langs: dict):
+def to_index_entry(song: Song, langs: dict, corpus_url: str | None = None):
     return {
         "id": song.id,
+        "corpus": corpus_url or f"../{song.path.parent.name}",
         "title": song.meta.get("title", {}),
         "display_title": display_title(song),
         "artist": song.meta.get("artist", []),
