@@ -1,0 +1,58 @@
+name: Pages
+
+# Publishes the demo site at https://<user>.github.io/custom-lyrics/
+#
+# The checkout below deliberately does not fetch submodules. lyrics/ is a
+# private repo of copyrighted text, and a Pages site is public even when it is
+# built from a private repo - so the corpus that gets published is demo/, and
+# build_site.py fails the build if anything else appears in it.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "README.md"
+      - "PLAN.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Refuse to build with the private corpus present
+        run: |
+          if [ -n "$(ls -A lyrics 2>/dev/null)" ]; then
+            echo "lyrics/ is not empty in CI - the private corpus must never be published"
+            exit 1
+          fi
+      - name: Build the demo site
+        run: python3 tools/build_site.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

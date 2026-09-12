@@ -306,3 +306,15 @@ main { padding: 1.5rem max(1rem, calc(50vw - 30rem)) 6rem; }
   main { padding: 0; }
   .sec { break-inside: avoid; margin-bottom: 1.4rem; }
 }
+
+/* Shown only when the index carries one — the public demo build says there what
+   it is, so a one-song library does not read as a broken site. */
+.notice {
+  margin: 0 0 .9rem;
+  padding: .6rem .8rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-size: .86rem;
+  line-height: 1.5;
+  color: var(--fg-dim);
+}

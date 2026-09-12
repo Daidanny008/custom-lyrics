@@ -77,6 +77,11 @@ function renderLibrary(route) {
   let langs = [...(route.langs || [])];
   search.value = query;
 
+  if (INDEX.notice) {
+    const note = el("p", "notice", INDEX.notice);
+    search.parentNode.insertBefore(note, search);
+  }
+
   const { tags: presentTags, languages } = presentFacets(INDEX.songs, INDEX);
 
   function chipRow(labelText, items, active, onToggle) {
@@ -269,7 +274,7 @@ async function renderSong(route) {
   }
 
   async function loadFile(f) {
-    const url = `../lyrics/${song.id}/${f.file}`;
+    const url = `${INDEX.corpus || "../lyrics"}/${song.id}/${f.file}`;
     if (!lyricCache.has(url)) {
       const res = await fetch(url, { cache: "no-cache" });
       if (!res.ok) throw new Error(`${f.file}: ${res.status}`);
