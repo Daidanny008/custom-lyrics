@@ -12,7 +12,8 @@
   "tags": [],
   "order": [
     "en.txt",
-    "fr.txt"
+    "fr.txt",
+    "en.literal.txt"
   ],
-  "notes": "Public domain by statute. The National Anthem Act declares both the melody and the words to be in the public domain; canada.ca states they \"may be used without having to obtain permission from the government\". Music Calixa Lavallée (1880), French words Adolphe-Basile Routhier (1880), English words Robert Stanley Weir (1908), amended in 2018 to replace \"in all thy sons command\" with \"in all of us command\" - the wording here.\nThe two are not translations of each other. Routhier's French and Weir's English are independent official texts that happen to share a lineation, so line 4 of one is not line 4 of the other in meaning - only in position. Both are transcribed from canada.ca."
+  "notes": "Public domain by statute. The National Anthem Act declares both the melody and the words to be in the public domain; canada.ca states they \"may be used without having to obtain permission from the government\". Music Calixa Lavallée (1880), French words Adolphe-Basile Routhier (1880), English words Robert Stanley Weir (1908), amended in 2018 to replace \"in all thy sons command\" with \"in all of us command\" - the wording here. Both official texts are transcribed from canada.ca.\nThe two official versions are not translations of each other: Routhier's French and Weir's English are independent texts that happen to share a lineation, so line 4 of one is not line 4 of the other in meaning, only in position.\nen.literal.txt is the third file for that reason - a plain English rendering of the French, written for this archive, so the French can actually be read by someone who only knows the English anthem. It has no official standing; the Act sets only the English and French texts."
 }

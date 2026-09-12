@@ -5,6 +5,10 @@
     "ipa": {
       "label": "IPA",
       "kind": "phonetic"
+    },
+    "literal": {
+      "label": "Literal",
+      "kind": "translation"
     }
   },
   "languages": {
