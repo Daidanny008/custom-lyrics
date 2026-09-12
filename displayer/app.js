@@ -4,13 +4,12 @@ import { renderLyrics, resolveMode, DEFAULT_MODE, extractSpeakers, stripSpeakers
 import { filterSongs, songRow, presentFacets, artistLine, bylineFor } from "./lib/library.js";
 import * as S from "./lib/state.js";
 
-// Labels only — the URL keys stay as they are, so saved ?mode= links keep working.
-// "beside" and "stacked" name the axis that actually separates those two: both
-// show a whole stanza per version, one horizontally and one vertically.
+// Keyed by the mode names in render.js, which the URL also uses, so the button,
+// the ?mode= value and the code all read the same. Old keys still resolve there.
 const MODE_LABELS = {
-  columns: "beside",     // whole stanza per version, side by side (default)
-  line: "interleave",    // every version of a line, one under the next
-  section: "stacked",    // whole stanza per version, one after another
+  beside: "beside",           // whole stanza per version, side by side (default)
+  interleaved: "interleaved", // every version of a line, one under the next
+  stacked: "stacked",         // whole stanza per version, one after another
 };
 
 const app = document.getElementById("app");

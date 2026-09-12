@@ -332,12 +332,20 @@ function renderByColumns(root, units, sectionCount) {
   }
 }
 
-// Columns are the default; "line" and "section" are explicit opt-ins.
-const MODES = { columns: renderByColumns, line: renderByLine, section: renderBySection };
-export const DEFAULT_MODE = "columns";
+// "beside" is the default; the other two are explicit opt-ins. The names say what
+// the reader sees rather than how it is laid out, and "beside"/"stacked" name the
+// axis that separates them - both show a whole stanza per version, one across and
+// one down.
+const MODES = { beside: renderByColumns, interleaved: renderByLine, stacked: renderBySection };
+export const DEFAULT_MODE = "beside";
+
+// What those keys used to be. A ?mode= link written before the rename still lands
+// where it meant to, which costs one lookup and saves every shared URL.
+const LEGACY_MODES = { columns: "beside", line: "interleaved", section: "stacked" };
 
 export function resolveMode(mode) {
-  return mode in MODES ? mode : DEFAULT_MODE;
+  if (mode in MODES) return mode;
+  return LEGACY_MODES[mode] || DEFAULT_MODE;
 }
 
 export function renderLyrics(root, views, mode, attributions = []) {
@@ -358,7 +366,7 @@ export function renderLyrics(root, views, mode, attributions = []) {
   // that stanza's widest name — a two-character singer pushes only its own
   // stanza's lyrics right. Measure the widest across the whole song and pin
   // every track to it so the lyric columns line up down the page.
-  if (attributions.length && resolved === "columns") {
+  if (attributions.length && resolved === "beside") {
     let widest = 0;
     for (const grid of root.querySelectorAll(".cols[data-who]")) {
       widest = Math.max(widest, grid.children[0].getBoundingClientRect().width);

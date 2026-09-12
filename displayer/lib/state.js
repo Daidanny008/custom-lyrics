@@ -1,6 +1,8 @@
+import { DEFAULT_MODE } from "./render.js";
+
 // Hash routing + per-song persistence.
 //   #/                                     library
-//   #/song/<id>?v=ru,ru.translit&mode=columns  song
+//   #/song/<id>?v=ru,ru.translit&mode=stacked  song
 
 const LS_PREFIX = "custom-lyrics:sel:";
 const LS_THEME = "custom-lyrics:theme";
@@ -17,7 +19,7 @@ export function readRoute() {
       view: "song",
       id: decodeURIComponent(m[1]),
       selected: query.get("v") ? query.get("v").split(",").filter(Boolean) : null,
-      mode: query.get("mode") || "columns",
+      mode: query.get("mode") || DEFAULT_MODE,
       who: query.get("who"),     // null = default (on), "0" = explicitly off
       langs: query.get("lg"),    // same, for the language column
     };
@@ -29,7 +31,7 @@ export function readRoute() {
 export function goSong(id, selected, mode, who, langs) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
-  if (mode && mode !== "columns") q.set("mode", mode);
+  if (mode && mode !== DEFAULT_MODE) q.set("mode", mode);
   if (who === false) q.set("who", "0");
   if (langs === false) q.set("lg", "0");
   const qs = q.toString();
@@ -40,7 +42,7 @@ export function goSong(id, selected, mode, who, langs) {
 export function replaceSong(id, selected, mode, who, langs) {
   const q = new URLSearchParams();
   if (selected && selected.length) q.set("v", selected.join(","));
-  if (mode && mode !== "columns") q.set("mode", mode);
+  if (mode && mode !== DEFAULT_MODE) q.set("mode", mode);
   if (who === false) q.set("who", "0");
   if (langs === false) q.set("lg", "0");
   const qs = q.toString();
