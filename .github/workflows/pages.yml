@@ -44,8 +44,11 @@ jobs:
         run: python3 tools/build_site.py
       - uses: actions/configure-pages@v5
         with:
-          # Turns Pages on for the repo the first time this runs, so the
-          # workflow is the whole setup rather than half of it.
+          # Only takes effect where the token can administer the repo. The
+          # default GITHUB_TOKEN cannot create a Pages site however many
+          # permissions it is given, so Pages was switched on once by hand
+          # (Settings > Pages > Source: GitHub Actions). This is here so a fork
+          # with a PAT does not need that step.
           enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
