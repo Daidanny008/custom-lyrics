@@ -11,7 +11,8 @@
   "tags": [],
   "order": [
     "cmn-Hans.txt",
+    "cmn-Hans.pinyin.txt",
     "en.txt"
   ],
-  "notes": "Words 田汉 (1898-1968), music 聂耳 (1912-1935). Mainland China's term is life plus 50 years, so both expired - 聂耳 in 1986, 田汉 in 2019 - and as a constitutionally adopted state symbol it is treated as a government edict.\nChinese text transcribed with the lineation used for the official text, which sets 起来！and each 前进！on their own lines.\nEnglish written for this archive rather than taken from a published translation, so no third-party rights attach to it."
+  "notes": "Words 田汉 (1898-1968), music 聂耳 (1912-1935). Mainland China's term is life plus 50 years, so both expired - 聂耳 in 1986, 田汉 in 2019 - and as a constitutionally adopted state symbol it is treated as a government edict.\nChinese text transcribed with the lineation used for the official text, which sets 起来！and each 前进！on their own lines.\nEnglish written for this archive rather than taken from a published translation, so no third-party rights attach to it.\ncmn-Hans.pinyin.txt was generated for this archive. It is written one syllable per character, with citation tones and no sandhi marked, so the displayer can pair each reading with its own character; all 15 lines pair exactly. Worth a read before you rely on it."
 }
