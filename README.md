@@ -83,7 +83,7 @@ See `PLAN.md` for the full design.
 | | |
 |---|---|
 | written in | Français 14 · Русский 8 · 普通话 5 · 闽南语 2 · Latina 2 · 粤语 2 · Italiano 1 · English 1 · Español 1 |
-| languages present | English 23 · 普通话 17 · Français 14 · Русский 8 · Latina 2 · 粤语 2 · 闽南语 1 · 國語 1 · Italiano 1 · Español 1 |
+| languages present | English 23 · 普通话 17 · Français 14 · Русский 8 · Latina 2 · 粤语 2 · 國語 1 · 闽南语 1 · Italiano 1 · Español 1 |
 | versions | translation 35 · original 34 · romanization 6 |
 | tags | 会唱的 16 · 录过的 7 · 戏腔 1 |
 
